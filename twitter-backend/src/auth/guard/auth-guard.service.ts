@@ -16,7 +16,6 @@ export class AuthGuardService implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    // Check if route is public
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -39,7 +38,6 @@ export class AuthGuardService implements CanActivate {
     }
 
     try {
-      // Verify JWT token
       const decoded = this.jwtService.verify(token);
       request.user = {
         id: decoded.sub,
