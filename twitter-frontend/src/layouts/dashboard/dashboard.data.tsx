@@ -4,13 +4,7 @@ import MailIcon from '@mui/icons-material/Mail';
 import PersonIcon from '@mui/icons-material/Person';
 
 import { paths } from "@/routes/paths";
-import { ReactNode } from "react";
-
-type DrawerItem = {
-    label: string;
-    path: string;
-    icon: ReactNode
-}
+import { DrawerItem } from "@/types";
 
 
 export const drawerItems: DrawerItem[] = [
