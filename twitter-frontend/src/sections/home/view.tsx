@@ -1,12 +1,33 @@
-import { Box } from "@mui/material";
-
+import { CreateTweet } from "@/shared/components";
+import { Box, Typography } from "@mui/material";
 
 export default function HomeView() {
-    return (
+  return (
+    <Box
+      sx={{
+        borderBottom: "10px solid #e6ecf0",
+      }}
+    >
+      <Typography
+        variant="h6"
+        sx={{
+          fontWeight: "bold",
+          fontSize: "1.5rem",
+        }}
+      >
+        Home View
+      </Typography>
+      <Box
+        sx={{
+          borderTop: "1px solid #e6ecf0",
+        }}
+      >
         <Box sx={{
-            marginTop: "0rem"
+            minWidth: '300px'
         }}>
-            <h2>Home View</h2>
+            <CreateTweet/>
         </Box>
-    );
+      </Box>
+    </Box>
+  );
 }

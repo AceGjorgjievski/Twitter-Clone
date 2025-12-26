@@ -118,6 +118,14 @@ export default function DashboardLayoutView({ children }: Props) {
       <Box component="main" sx={{ flexGrow: 1, p: 2 }}>
         {children}
       </Box>
+      <Box
+        sx={{
+            borderLeft: "1px solid #e6ecf0",
+            width: '350px'
+        }}
+      >
+        right panel
+      </Box>
     </Box>
   );
 }
