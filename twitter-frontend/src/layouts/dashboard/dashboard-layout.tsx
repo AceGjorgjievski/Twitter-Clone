@@ -16,7 +16,7 @@ import { drawerItems } from "./dashboard.data";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
 import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
 import { useSidebarContext } from "@/components/context";
-import { useRouter } from "@/routes/hooks";
+import { usePathname, useRouter } from "@/routes/hooks";
 
 type Props = {
   children: React.ReactNode;
@@ -24,6 +24,7 @@ type Props = {
 
 export default function DashboardLayoutView({ children }: Props) {
   const router = useRouter();
+  const pathName = usePathname();
   const { isCollapsed, toggleCollapse } = useSidebarContext();
   const drawerWidth = isCollapsed ? 90 : 240;
 
@@ -43,43 +44,47 @@ export default function DashboardLayoutView({ children }: Props) {
             boxSizing: "border-box",
             borderRight: "1px solid #e6ecf0",
           },
-          zIndex: 1
+          zIndex: 1,
         }}
       >
         <List sx={{ mt: 2 }}>
-          {drawerItems.map((item: DrawerItem) => (
-            <ListItem key={item.label} disablePadding>
-              <ListItemButton
-                onClick={() => handleNavigate(item.path)}
-                sx={{
-                  borderRadius: "999px",
-                  mx: 2,
-                  my: 0.5,
-                  "&:hover": {
-                    backgroundColor: "#e8f5fd",
-                  },
-                }}
-              >
-                <ListItemIcon
+          {drawerItems.map((item: DrawerItem) => {
+            const selected = pathName === item.path;
+            return (
+              <ListItem key={item.label} disablePadding>
+                <ListItemButton
+                  onClick={() => handleNavigate(item.path)}
                   sx={{
-                    minWidth: 40,
-                    color: "#0f1419",
+                    borderRadius: "999px",
+                    mx: 2,
+                    my: 0.5,
+                    "&:hover": {
+                      backgroundColor: "#e8f5fd",
+                    },
                   }}
+                  selected={selected}
                 >
-                  {item.icon}
-                </ListItemIcon>
-                {!isCollapsed && (
-                  <ListItemText
-                    primary={item.label}
-                    primaryTypographyProps={{
-                      fontSize: "1.1rem",
-                      fontWeight: 500,
+                  <ListItemIcon
+                    sx={{
+                      minWidth: 40,
+                      color: "#0f1419",
                     }}
-                  />
-                )}
-              </ListItemButton>
-            </ListItem>
-          ))}
+                  >
+                    {item.icon}
+                  </ListItemIcon>
+                  {!isCollapsed && (
+                    <ListItemText
+                      primary={item.label}
+                      primaryTypographyProps={{
+                        fontSize: "1.1rem",
+                        fontWeight: 500,
+                      }}
+                    />
+                  )}
+                </ListItemButton>
+              </ListItem>
+            );
+          })}
         </List>
       </Drawer>
       <Box
