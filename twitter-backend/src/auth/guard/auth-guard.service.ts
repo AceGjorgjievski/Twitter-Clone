@@ -45,7 +45,7 @@ export class AuthGuardService implements CanActivate {
       };
       return true;
     } catch (err) {
-      throw new UnauthorizedException('Unauthorized access');
+      throw new UnauthorizedException('Unauthorized access: ' + err);
     }
   }
 }

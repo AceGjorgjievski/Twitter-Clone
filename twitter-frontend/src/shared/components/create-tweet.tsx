@@ -1,16 +1,19 @@
 "use client";
 
-import { Box, Button, TextField, Popover } from "@mui/material";
+import { Box, Button, TextField, Popover, Avatar } from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
 import EmojiEmotionsOutlinedIcon from "@mui/icons-material/EmojiEmotionsOutlined";
 import { useState, useRef } from "react";
 import { EMOJIS } from "./emojis-data";
+import { useAuthContext } from "@/auth/hooks";
 
 export default function CreateTweet() {
   const [text, setText] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [emojiAnchor, setEmojiAnchor] = useState<HTMLElement | null>(null);
+
+  const { user, authenticated } = useAuthContext();
 
   return (
     <Box
@@ -21,10 +24,12 @@ export default function CreateTweet() {
         borderBottom: "1px solid #e6ecf0",
       }}
     >
-      <Box
+      <Avatar
+        src={user?.profilePicture || "/images/user-default-avatar.png"}
+        alt={user?.name || "User"}
         sx={{
-          width: 48,
-          height: 48,
+          width: 40,
+          height: 40,
           borderRadius: "50%",
           backgroundColor: "#cfd9de",
           flexShrink: 0,
@@ -34,7 +39,11 @@ export default function CreateTweet() {
       <Box sx={{ flexGrow: 1 }}>
         <TextField
           variant="standard"
-          placeholder="What's happening?"
+          placeholder={
+            authenticated
+              ? `What's happening, ${user?.name}?`
+              : `What's happening?`
+          }
           fullWidth
           multiline
           maxRows={4}
@@ -95,20 +104,18 @@ export default function CreateTweet() {
                   maxWidth: 200,
                 }}
               >
-                {EMOJIS.map(
-                  (emoji) => (
-                    <Box
-                      key={emoji}
-                      sx={{ cursor: "pointer", fontSize: "1.3rem" }}
-                      onClick={() => {
-                        setText((prev) => (prev + emoji).slice(0, 280));
-                        setEmojiAnchor(null);
-                      }}
-                    >
-                      {emoji}
-                    </Box>
-                  )
-                )}
+                {EMOJIS.map((emoji) => (
+                  <Box
+                    key={emoji}
+                    sx={{ cursor: "pointer", fontSize: "1.3rem" }}
+                    onClick={() => {
+                      setText((prev) => (prev + emoji).slice(0, 280));
+                      setEmojiAnchor(null);
+                    }}
+                  >
+                    {emoji}
+                  </Box>
+                ))}
               </Box>
             </Popover>
           </Box>

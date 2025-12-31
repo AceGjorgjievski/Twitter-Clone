@@ -15,7 +15,7 @@ export default function HomeView() {
           fontSize: "1.5rem",
         }}
       >
-        Home View
+        Home
       </Typography>
       <Box
         sx={{

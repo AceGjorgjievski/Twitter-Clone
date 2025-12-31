@@ -1,3 +1,4 @@
+import { AuthProvider } from "@/auth/context/jwt/auth-provider";
 import { SidebarProvider } from "@/components/context";
 import DashboardClientWrapper from "@/layouts/dashboard/wrapper";
 import type { Metadata } from "next";
@@ -26,11 +27,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <SidebarProvider>
-          <DashboardClientWrapper>
-            {children}
-          </DashboardClientWrapper>
-        </SidebarProvider>
+        <AuthProvider>
+          <SidebarProvider>
+            <DashboardClientWrapper>
+              {children}
+            </DashboardClientWrapper>
+          </SidebarProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -8,7 +8,7 @@ const DashboardLayout = dynamic(() => import("./index"), {
   ssr: false,
 });
 
-const publicRoutes = ["/login"];
+const publicRoutes = ["/login", "/register"];
 
 export default function DashboardClientWrapper({
   children,

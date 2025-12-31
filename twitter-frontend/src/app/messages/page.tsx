@@ -1,4 +1,4 @@
-import MessagesView from "@/sections/messages/view";
+import { MessagesView } from "@/sections/messages";
 
 
 export default function Messages() {

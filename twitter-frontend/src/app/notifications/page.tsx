@@ -1,4 +1,4 @@
-import NotificationsView from "@/sections/notifications/view";
+import { NotificationsView } from "@/sections/notifications";
 
 
 export default function Notifications() {

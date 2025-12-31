@@ -1,0 +1,49 @@
+import { AuthUserType } from "@/types";
+
+type CanRemove = {
+  login?: (email: string, password: string) => Promise<void>;
+  register?: (
+    username: string,
+    email: string,
+    password: string,
+  ) => Promise<void>;
+  //
+  loginWithGoogle?: () => Promise<void>;
+  loginWithGithub?: () => Promise<void>;
+  loginWithTwitter?: () => Promise<void>;
+  //
+  confirmRegister?: (email: string, code: string) => Promise<void>;
+  forgotPassword?: (email: string) => Promise<void>;
+  resendCodeRegister?: (email: string) => Promise<void>;
+  newPassword?: (email: string, code: string, password: string) => Promise<void>;
+  updatePassword?: (password: string) => Promise<void>;
+};
+
+export type JWTContextType = CanRemove & {
+  user: AuthUserType;
+  method: string;
+  loading: boolean;
+  authenticated: boolean;
+  unauthenticated: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  register: (username: string, email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+};
+
+
+export type AuthStateType = {
+  status?: string;
+  loading: boolean;
+  user: AuthUserType;
+};
+
+export type ActionMapType<M extends { [index: string]: unknown }> = {
+  [Key in keyof M]: M[Key] extends undefined
+    ? {
+        type: Key;
+      }
+    : {
+        type: Key;
+        payload: M[Key];
+      };
+};

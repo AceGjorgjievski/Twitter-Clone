@@ -6,7 +6,7 @@ import { UserRegisterDto } from 'models/user-register.dto';
 import { CurrentUserDecorator } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
 
-@Controller('auth')
+@Controller('api/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
@@ -25,6 +25,7 @@ export class AuthController {
   @Get('current')
   @UseGuards(AuthGuard('jwt'))
   getCurrent(@CurrentUserDecorator() user: any) {
-    return user;
+    const fullUser = this.authService.findUserByUserId(user.userId);
+    return fullUser;
   }
 }

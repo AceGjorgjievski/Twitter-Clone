@@ -15,12 +15,12 @@ export class AuthService {
 
   async register(
     body: UserRegisterDto,
-  ): Promise<Omit<User, 'password'> & { token: string }> {
+  ): Promise<Omit<User, 'password'> & { accessToken: string }> {
     const hashedPassword = await bcrypt.hash(body.password, 10);
 
     const user = await this.databaseService.user.create({
       data: {
-        name: body.name,
+        name: body.username,
         email: body.email,
         password: hashedPassword,
         role: 'user',
@@ -36,13 +36,13 @@ export class AuthService {
       role: user.role,
       profilePicture: user.profilePicture,
       createdAt: user.createdAt,
-      token,
+      accessToken: token,
     };
   }
 
   async login(
     body: UserLoginDto,
-  ): Promise<Omit<User, 'password'> & { token: string }> {
+  ): Promise<Omit<User, 'password'> & { accessToken: string }> {
     const user = await this.databaseService.user.findUnique({
       where: { email: body.email },
     });
@@ -65,7 +65,23 @@ export class AuthService {
       role: user.role,
       profilePicture: user.profilePicture,
       createdAt: user.createdAt,
-      token,
+      accessToken: token,
     };
+  }
+
+  async findUserByUserId(userId: number): Promise<Omit<User, 'password'>> {
+    return this.databaseService.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        profilePicture: true,
+        createdAt: true,
+      },
+    });
   }
 }
