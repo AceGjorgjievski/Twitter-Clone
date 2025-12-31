@@ -17,7 +17,7 @@ export default function LeftPanel() {
   const router = useRouter();
   const pathName = usePathname();
 
-  const { isCollapsed, toggleCollapse } = useSidebarContext();
+  const { isCollapsed } = useSidebarContext();
   const { authenticated } = useAuthContext();
 
   const drawerWidth = isCollapsed ? 90 : 240;
