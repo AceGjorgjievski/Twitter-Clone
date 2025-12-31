@@ -1,4 +1,4 @@
-import { AuthUserType } from "@/types";
+export type AuthUserType = null | Record<string, unknown>;
 
 type CanRemove = {
   login?: (email: string, password: string) => Promise<void>;

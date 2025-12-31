@@ -25,8 +25,12 @@ export default function CreateTweet() {
       }}
     >
       <Avatar
-        src={user?.profilePicture || "/images/user-default-avatar.png"}
-        alt={user?.name || "User"}
+        src={
+          typeof user?.profilePicture === "string"
+            ? user.profilePicture
+            : "/images/default-avatar.png"
+        }
+        alt={typeof user?.name === "string" ? user.name : "User"}
         sx={{
           width: 40,
           height: 40,

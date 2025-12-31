@@ -17,16 +17,17 @@ export default function RightPanel() {
   const renderProfile = (
     <Stack spacing={1.5} alignItems="center" sx={{ mt: 2 }}>
       <Avatar
-        src={user?.profilePicture || "/images/default-avatar.png"}
-        alt={user?.name || "User"}
-        sx={{
-          width: 80,
-          height: 80,
-        }}
+        src={
+          typeof user?.profilePicture === "string"
+            ? user.profilePicture
+            : "/images/default-avatar.png"
+        }
+        alt={typeof user?.name === "string" ? user.name : "User"}
+        sx={{ width: 80, height: 80 }}
       />
 
       <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-        {user?.name}
+        {typeof user?.name === "string" ? user.name : ""}
       </Typography>
 
       <Button
