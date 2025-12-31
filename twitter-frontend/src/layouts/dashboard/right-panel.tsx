@@ -11,11 +11,15 @@ import {
 } from "@mui/material";
 
 export default function RightPanel() {
-  const { user, authenticated } = useAuthContext();
+  const { user, authenticated, logout } = useAuthContext();
   const router = useRouter();
 
+  const handleLogout = () => {
+    logout();
+  };
+
   const renderProfile = (
-    <Stack spacing={1.5} alignItems="center" sx={{ mt: 2 }}>
+    <Stack spacing={1.5} alignItems="center" sx={{ mt: 2, marginTop: "2rem" }}>
       <Avatar
         src={
           typeof user?.profilePicture === "string"
@@ -42,6 +46,19 @@ export default function RightPanel() {
       >
         View profile
       </Button>
+
+      <Button
+        variant="contained"
+        sx={{
+          borderRadius: "999px",
+          textTransform: "none",
+          fontWeight: 500,
+          px: 3,
+        }}
+        onClick={handleLogout}
+      >
+        Logout
+      </Button>
     </Stack>
   );
 
@@ -61,6 +78,7 @@ export default function RightPanel() {
           textTransform: "none",
           fontWeight: 300,
           width: "150px",
+          marginTop: "2rem",
         }}
         onClick={() => router.replace(paths.login())}
       >
@@ -92,7 +110,6 @@ export default function RightPanel() {
       sx={{
         borderLeft: "1px solid #e6ecf0",
         width: "350px",
-        marginTop: "2rem",
       }}
     >
       {authenticated ? renderProfile : renderLoginRegisterButtons}
