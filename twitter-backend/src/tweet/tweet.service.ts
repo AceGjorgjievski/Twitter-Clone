@@ -1,4 +1,4 @@
-import { Prisma } from '.prisma/client';
+import { Prisma, Tweet } from '.prisma/client';
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from 'database/database.service';
 import { CreateTweetDto } from 'models/create-tweet.dto';
@@ -7,11 +7,11 @@ import { CreateTweetDto } from 'models/create-tweet.dto';
 export class TweetService {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  async create(dto: CreateTweetDto, userId: number) {
+  async create(dto: CreateTweetDto, userId: number): Promise<Tweet> {
     return this.databaseService.tweet.create({
       data: {
         description: dto.description,
-        image: dto.image,
+        images: dto.images || [],
         author: {
           connect: { id: userId },
         },
@@ -20,7 +20,30 @@ export class TweetService {
   }
 
   async findAll() {
-    return this.databaseService.tweet.findMany({});
+    return this.databaseService.tweet.findMany({
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            profilePicture: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
+  }
+
+  async findAllForCurrentUser(userId: number): Promise<Tweet[]> {
+    return this.databaseService.tweet.findMany({
+      where: {
+        author: {
+          id: userId,
+        },
+      },
+    });
   }
 
   async findOne(id: number) {

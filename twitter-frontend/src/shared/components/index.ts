@@ -1,1 +1,1 @@
-export { default as CreateTweet } from './create-tweet';
+export { default as CreateTweet } from '../../sections/home/create-tweet';

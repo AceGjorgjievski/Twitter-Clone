@@ -30,7 +30,7 @@ model User {
 model Tweet {
   id Int @id @default(autoincrement())
   description String @db.VarChar(280)
-  image String?
+  images String[]
   comments Comment[]
   totalLikes Int @default(0)
 

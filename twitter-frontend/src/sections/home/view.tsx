@@ -17,17 +17,7 @@ export default function HomeView() {
       >
         Home
       </Typography>
-      <Box
-        sx={{
-          borderTop: "1px solid #e6ecf0",
-        }}
-      >
-        <Box sx={{
-            minWidth: '300px'
-        }}>
-            <CreateTweet/>
-        </Box>
-      </Box>
+      <CreateTweet />
     </Box>
   );
 }
