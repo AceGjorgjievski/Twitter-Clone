@@ -24,10 +24,15 @@ export default function RightPanel() {
         src={
           typeof user?.profilePicture === "string"
             ? user.profilePicture
-            : "/images/default-avatar.png"
+            : "/images/user-default-avatar.png"
         }
-        alt={typeof user?.name === "string" ? user.name : "User"}
-        sx={{ width: 80, height: 80 }}
+        sx={{
+          width: 80,
+          height: 80,
+          borderRadius: "50%",
+          backgroundColor: "#cfd9de",
+          flexShrink: 0,
+        }}
       />
 
       <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
@@ -109,7 +114,7 @@ export default function RightPanel() {
     <Box
       sx={{
         borderLeft: "1px solid #e6ecf0",
-        width: "350px",
+        width: "450px",
       }}
     >
       {authenticated ? renderProfile : renderLoginRegisterButtons}

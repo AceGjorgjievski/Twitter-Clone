@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Box,
   Button,
@@ -15,17 +13,28 @@ import { EMOJIS } from "./emojis-data";
 import { useAuthContext } from "@/auth/hooks";
 import { useRouter } from "@/routes/hooks";
 import { paths } from "@/routes/paths";
-import createTweet from "@/services/tweet.service";
 import ImagePreviewer from "./image-previewer";
+import { createTweet } from "@/services";
 
-export default function CreateTweet() {
+type Props = {
+  onTweetCreated: () => void;
+};
+
+export default function CreateTweet({ onTweetCreated }: Props) {
   const [description, setDescription] = useState("");
   const [images, setImages] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
   const [limitAnchor, setLimitAnchor] = useState<HTMLElement | null>(null);
   const [emojiAnchor, setEmojiAnchor] = useState<HTMLElement | null>(null);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const imagePreviewsRef = useRef<string[]>([]);
+
+  const [previewUpdateTrigger, setPreviewUpdateTrigger] = useState(0);
+  const triggerUpdate = () => {
+    setPreviewUpdateTrigger((prev) => prev + 1);
+  };
+
   const router = useRouter();
 
   const { user, authenticated } = useAuthContext();
@@ -36,9 +45,9 @@ export default function CreateTweet() {
 
   useEffect(() => {
     return () => {
-      imagePreviews.forEach((url) => URL.revokeObjectURL(url));
+      imagePreviewsRef.current.forEach((url) => URL.revokeObjectURL(url));
     };
-  }, [imagePreviews]);
+  }, []);
 
   const handleCreateTweet = async () => {
     if (!authenticated) {
@@ -54,9 +63,46 @@ export default function CreateTweet() {
     });
 
     await createTweet(formData);
+    imagePreviewsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    imagePreviewsRef.current = [];
+
     setDescription("");
     setImages([]);
-    setImagePreviews([]);
+    triggerUpdate();
+
+    if (onTweetCreated) onTweetCreated();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+
+    const remainingSlots = 5 - images.length;
+    const selectedFiles = files.slice(0, remainingSlots);
+
+    const newPreviews = selectedFiles.map((file) => URL.createObjectURL(file));
+
+    imagePreviewsRef.current = [...imagePreviewsRef.current, ...newPreviews];
+
+    setImages((prev) => [...prev, ...selectedFiles]);
+
+    triggerUpdate();
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleDeleteImage = (index: number) => {
+    URL.revokeObjectURL(imagePreviewsRef.current[index]);
+
+    imagePreviewsRef.current = imagePreviewsRef.current.filter(
+      (_, i) => i !== index
+    );
+
+    setImages((prev) => prev.filter((_, i) => i !== index));
+
+    triggerUpdate();
   };
 
   const renderAvatar = (
@@ -66,7 +112,6 @@ export default function CreateTweet() {
           ? user.profilePicture
           : "/images/user-default-avatar.png"
       }
-      alt={typeof user?.name === "string" ? user.name : "User"}
       sx={{
         width: 40,
         height: 40,
@@ -153,21 +198,7 @@ export default function CreateTweet() {
           multiple
           ref={fileInputRef}
           style={{ display: "none" }}
-          onChange={(e) => {
-            const files = Array.from(e.target.files ?? []);
-
-            if (!files.length) return;
-
-            const remainingSlots = 3 - images.length;
-            const selectedFiles = files.slice(0, remainingSlots);
-
-            const previews = selectedFiles.map((file) =>
-              URL.createObjectURL(file)
-            );
-
-            setImages((prev) => [...prev, ...selectedFiles]);
-            setImagePreviews((prev) => [...prev, ...previews]);
-          }}
+          onChange={handleFileChange}
         />
         <Tooltip placement="bottom" arrow title={"Upload an image."}>
           <Box
@@ -238,7 +269,7 @@ export default function CreateTweet() {
         gap: 2,
         p: 2,
         borderBottom: "1px solid #e6ecf0",
-          borderTop: "1px solid #e6ecf0",
+        borderTop: "1px solid #e6ecf0",
         minWidth: "300px",
       }}
     >
@@ -246,13 +277,10 @@ export default function CreateTweet() {
 
       <Box sx={{ flexGrow: 1 }}>
         {renderPlaceholder}
-        {imagePreviews.length > 0 && (
+        {imagePreviewsRef.current.length > 0 && (
           <ImagePreviewer
-            imagePreviews={imagePreviews}
-            onDelete={(index) => {
-              setImages((prev) => prev.filter((_, i) => i !== index));
-              setImagePreviews((prev) => prev.filter((_, i) => i !== index));
-            }}
+            imagePreviews={imagePreviewsRef.current}
+            onDelete={handleDeleteImage}
           />
         )}
 

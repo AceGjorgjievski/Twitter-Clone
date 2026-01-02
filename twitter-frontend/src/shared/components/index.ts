@@ -1,1 +1,1 @@
-export { default as CreateTweet } from '../../sections/home/create-tweet';
+export { default as ImagePreviewModal } from './image-preview-modal';

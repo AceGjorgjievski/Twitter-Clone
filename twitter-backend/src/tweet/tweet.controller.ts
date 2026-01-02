@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Query,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
@@ -14,14 +15,23 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { Express } from 'express';
+import { Public } from 'auth/decorators/public.decorator';
+import { PaginatedTweet } from 'models/paginated-tweet.dto';
 
 @Controller('api/tweet')
 export class TweetController {
   constructor(private readonly tweeterService: TweetService) {}
 
+  @Public()
   @Get()
-  async getAllTweets(): Promise<Tweet[]> {
-    return this.tweeterService.findAll();
+  async getAllTweets(
+    @Query('limit') limit = 5,
+    @Query('cursor') cursor?: string,
+  ): Promise<PaginatedTweet> {
+    return this.tweeterService.findAllPaginated({
+      limit: Number(limit),
+      cursor,
+    });
   }
 
   @Get('currentUser')
@@ -33,7 +43,7 @@ export class TweetController {
 
   @Post()
   @UseInterceptors(
-    FilesInterceptor('images', 3, {
+    FilesInterceptor('images', 5, {
       storage: diskStorage({
         destination: './uploads',
         filename: (req, file, cb) => {

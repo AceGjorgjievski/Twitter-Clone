@@ -20,7 +20,7 @@ export default function LeftPanel() {
   const { isCollapsed } = useSidebarContext();
   const { authenticated } = useAuthContext();
 
-  const drawerWidth = isCollapsed ? 90 : 240;
+  const drawerWidth = isCollapsed ? 90 : 340;
 
   const handleNavigate = (path: string) => {
     router.push(path);

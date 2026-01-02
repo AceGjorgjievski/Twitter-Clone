@@ -1,6 +1,7 @@
-import { Box, Button, Modal } from "@mui/material";
+import { ImagePreviewModal } from "@/shared/components";
+import { Box, Button } from "@mui/material";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Props = {
   imagePreviews: string[];
@@ -8,36 +9,25 @@ type Props = {
 };
 
 export default function ImagePreviewer({ imagePreviews, onDelete }: Props) {
-  const [previewOpen, setPreviewOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
 
-  const openPreview = (index: number) => {
+  const openModal = (index: number) => {
     setCurrentIndex(index);
-    setPreviewOpen(true);
+    setModalOpen(true);
   };
 
-  const closePreview = () => {
-    setPreviewOpen(false);
-    setCurrentIndex(null);
-  };
-
-  const prevImage = () => {
-    if (currentIndex !== null && currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
+  useEffect(() => {
+    if (currentIndex !== null && currentIndex >= imagePreviews.length) {
+      setCurrentIndex(imagePreviews.length - 1);
     }
-  };
-
-  const nextImage = () => {
-    if (currentIndex !== null && currentIndex < imagePreviews.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    }
-  };
+  }, [imagePreviews.length]);
 
   const renderImagePreviews = (
     <>
       {imagePreviews.map((src, index) => (
         <Box
-          key={src}
+          key={`${src}-${index}`}
           sx={{
             position: "relative",
             borderRadius: 2,
@@ -46,7 +36,7 @@ export default function ImagePreviewer({ imagePreviews, onDelete }: Props) {
             height: 100,
             cursor: "pointer",
           }}
-          onClick={() => openPreview(index)}
+          onClick={() => openModal(index)}
         >
           <Image
             src={src}
@@ -79,93 +69,6 @@ export default function ImagePreviewer({ imagePreviews, onDelete }: Props) {
     </>
   );
 
-  const renderModal = (
-    <Modal
-      open={previewOpen}
-      onClose={closePreview}
-      closeAfterTransition
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <Box
-        sx={{
-          position: "relative",
-          maxWidth: "90%",
-          maxHeight: "90%",
-          outline: "none",
-        }}
-      >
-        {currentIndex !== null && (
-          <Image
-            src={imagePreviews[currentIndex]}
-            alt="full preview"
-            width={500}
-            height={500}
-            style={{ width: 550, height: 650, borderRadius: 8 }}
-          />
-        )}
-
-        <Button
-          size="small"
-          sx={{
-            position: "absolute",
-            top: 10,
-            right: 10,
-            minWidth: 0,
-            borderRadius: "50%",
-            backgroundColor: "rgba(0,0,0,0.6)",
-            color: "#fff",
-            border: "1px solid white",
-          }}
-          onClick={closePreview}
-        >
-          ✕
-        </Button>
-
-        {currentIndex !== null && currentIndex > 0 && (
-          <Button
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: -40,
-              transform: "translateY(-50%)",
-              minWidth: 0,
-              borderRadius: "50%",
-              backgroundColor: "rgba(0,0,0,0.6)",
-              color: "#fff",
-              border: "1px solid white",
-            }}
-            onClick={prevImage}
-          >
-            ◀
-          </Button>
-        )}
-
-        {currentIndex !== null && currentIndex < imagePreviews.length - 1 && (
-          <Button
-            sx={{
-              position: "absolute",
-              top: "50%",
-              right: -40,
-              transform: "translateY(-50%)",
-              minWidth: 0,
-              borderRadius: "50%",
-              backgroundColor: "rgba(0,0,0,0.6)",
-              color: "#fff",
-              border: "1px solid white",
-            }}
-            onClick={nextImage}
-          >
-            ▶
-          </Button>
-        )}
-      </Box>
-    </Modal>
-  );
-
   return (
     <>
       <Box
@@ -179,7 +82,12 @@ export default function ImagePreviewer({ imagePreviews, onDelete }: Props) {
         {renderImagePreviews}
       </Box>
 
-      {renderModal}
+      <ImagePreviewModal
+        open={modalOpen}
+        imagePreviews={imagePreviews}
+        currentIndex={currentIndex!}
+        onClose={() => setModalOpen(false)}
+      />
     </>
   );
 }

@@ -39,6 +39,9 @@ model Tweet {
 
   likedBy User[] @relation("LikedTweets")
   reTweetedBy User[] @relation("ReTweets")
+
+  createdAt DateTime @default(now())
+  @@index([createdAt])
 }
 
 model Comment {

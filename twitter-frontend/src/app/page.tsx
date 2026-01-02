@@ -1,4 +1,4 @@
-import { HomeView } from "@/sections/home";
+import { HomeView } from "@/sections/home/view";
 
 export default function Home() {
   return (

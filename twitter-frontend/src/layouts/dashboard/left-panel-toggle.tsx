@@ -12,7 +12,7 @@ export default function LeftPanelToggle() {
       sx={{
         position: "fixed",
         top: "50%",
-        left: isCollapsed ? 68 : 220,
+        left: isCollapsed ? 68 : 320,
         transition: "left 0.3s ease",
         zIndex: 3,
       }}
