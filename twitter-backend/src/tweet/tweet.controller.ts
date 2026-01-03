@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Query,
   UploadedFiles,
@@ -67,5 +68,16 @@ export class TweetController {
       },
       user.id,
     );
+  }
+
+  @Post(':id/like')
+  async likeTweet(
+    @Param('id') tweetId: string,
+    @Body() body: { userId: number },
+  ): Promise<{
+    liked: boolean;
+    totalLikes: number;
+  }> {
+    return this.tweeterService.likeTweet(Number(tweetId), body.userId);
   }
 }
