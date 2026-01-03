@@ -11,6 +11,7 @@ export default function SingleImage({ images, onImageClick }: Props) {
     <Box
       sx={{
         marginLeft: "3rem",
+        marginRight: "1rem",
         marginTop: 1,
         display: "flex",
         justifyContent: "center",

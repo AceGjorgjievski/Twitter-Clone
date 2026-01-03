@@ -65,6 +65,13 @@ export class TweetService {
             createdAt: true,
           },
         },
+        likedBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
     });
 
@@ -111,6 +118,52 @@ export class TweetService {
       where: {
         id: id,
       },
+    });
+  }
+
+  async likeTweet(
+    tweetId: number,
+    userId: number,
+  ): Promise<{
+    liked: boolean;
+    totalLikes: number;
+  }> {
+    return this.databaseService.$transaction(async (prisma) => {
+      const tweet = await prisma.tweet.findUnique({
+        where: { id: tweetId },
+        include: {
+          likedBy: {
+            where: { id: userId },
+            select: { id: true },
+          },
+        },
+      });
+
+      if (!tweet) {
+        throw new Error('Tweet not found');
+      }
+
+      const alreadyLiked = tweet.likedBy.length > 0;
+
+      const updatedTweet = await prisma.tweet.update({
+        where: { id: tweetId },
+        data: {
+          likedBy: alreadyLiked
+            ? { disconnect: { id: userId } }
+            : { connect: { id: userId } },
+          totalLikes: {
+            increment: alreadyLiked ? -1 : 1,
+          },
+        },
+        select: {
+          totalLikes: true,
+        },
+      });
+
+      return {
+        liked: !alreadyLiked,
+        totalLikes: updatedTweet.totalLikes,
+      };
     });
   }
 }

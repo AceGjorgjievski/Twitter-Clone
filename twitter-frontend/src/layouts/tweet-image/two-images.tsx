@@ -16,6 +16,7 @@ export default function TwoImages({
     <Box
       sx={{
         marginLeft: "3rem",
+        marginRight: "1rem",
         marginBottom: 1,
         display: "flex",
         gap: 1,

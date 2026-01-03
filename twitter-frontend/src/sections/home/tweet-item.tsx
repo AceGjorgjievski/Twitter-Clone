@@ -1,5 +1,5 @@
 import { TweetImageLayout } from "@/layouts/tweet-image";
-import { ImagePreviewModal } from "@/shared/components";
+import { ImagePreviewModal, RenderTweetButtons } from "@/shared/components";
 import { Tweet } from "@/types";
 import { Box, Typography, Avatar, Stack } from "@mui/material";
 import { useState } from "react";
@@ -93,6 +93,7 @@ export default function TweetItem({ tweet }: Props) {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
       />
+      <RenderTweetButtons tweet={tweet} />
     </Box>
   );
 }

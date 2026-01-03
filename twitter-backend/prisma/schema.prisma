@@ -47,6 +47,7 @@ model Tweet {
 model Comment {
   id Int @id @default(autoincrement())
   author_id Int
+  description String @db.VarChar(280)
   tweetId Int
   tweet Tweet @relation(fields: [tweetId], references: [id])
 }

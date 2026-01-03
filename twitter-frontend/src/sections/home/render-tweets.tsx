@@ -2,7 +2,6 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { loadTweets } from "@/services";
 import { Tweet } from "@/types";
 import { useEffect, useRef } from "react";
-import Image from "next/image";
 import TweetItem from "./tweet-item";
 
 type Props = {

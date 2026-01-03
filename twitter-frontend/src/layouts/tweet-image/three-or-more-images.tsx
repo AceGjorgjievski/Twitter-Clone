@@ -135,6 +135,7 @@ export default function ThreeOrMoreImages({
     <Box
       sx={{
         marginLeft: "3rem",
+        marginRight: "1rem",
         marginBottom: 1,
         display: "flex",
         gap: 1,

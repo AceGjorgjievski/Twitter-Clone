@@ -1,4 +1,3 @@
-import { Tweet } from "@/types";
 import { BACKEND_API } from "../../config-global";
 import axiosInstance from "@/utils/axios";
 
@@ -18,6 +17,14 @@ export async function loadTweets(limit = 5, cursor?: string) {
   const res = await axiosInstance.get(API_URL, {
     params: { limit, cursor },
   });
-  
+
+  return res.data;
+}
+
+export async function likeTweet(tweetId: number, userId: number) {
+  const res = await axiosInstance.post(`${API_URL}/${tweetId}/like`, {
+    userId,
+  });
+
   return res.data;
 }

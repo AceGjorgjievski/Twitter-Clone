@@ -1,3 +1,4 @@
+import { Comment } from "./comment-dto.type";
 import { User } from "./user-dto.type";
 
 export type Tweet = {
@@ -7,4 +8,8 @@ export type Tweet = {
     totalLikes: number;
     createdAt: Date;
     author: User;
+
+    comments?: Comment[];
+    likedBy?: User[];
+    retweetedBy?: User[];
 }
