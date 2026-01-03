@@ -10,6 +10,8 @@ import { likeTweet } from "@/services";
 import { Tweet } from "@/types";
 
 import { JSX, useState } from "react";
+import { useRouter } from "@/routes/hooks";
+import { paths } from "@/routes/paths";
 
 type Props = {
   tweet: Tweet;
@@ -57,7 +59,8 @@ const renderButtons = (
 ];
 
 export default function RenderTweetButtons({ tweet }: Props) {
-  const { user } = useAuthContext();
+  const { user, authenticated } = useAuthContext();
+  const router = useRouter();
 
   const [isLiked, setIsLiked] = useState<boolean>(
     !!tweet.likedBy?.find((u) => u.id === user?.id)
@@ -66,6 +69,8 @@ export default function RenderTweetButtons({ tweet }: Props) {
   const [totalLikes, setTotalLikes] = useState<number>(tweet.totalLikes);
 
   const handleLike = async () => {
+    if(!authenticated) router.push(paths.login());
+
     setIsLiked((prev) => !prev);
     setTotalLikes((prev) => (isLiked ? prev - 1 : prev + 1));
 
