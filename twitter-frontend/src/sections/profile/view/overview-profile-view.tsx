@@ -159,7 +159,7 @@ export default function ProfileView() {
       {currentTab === "profile" && (
         <ProfileSubView user={user as User} tweets={userTweets} />
       )}
-      {currentTab === "liked-tweets" && <LikedTweetsView />}
+      {currentTab === "liked-tweets" && <LikedTweetsView user={user as User}/>}
       {currentTab === "followers" && <FollowersView />}
       {currentTab === "following" && <FollowingView />}
     </>

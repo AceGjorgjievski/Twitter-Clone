@@ -12,6 +12,7 @@ import { Tweet } from "@/types";
 import { JSX, useState } from "react";
 import { useRouter } from "@/routes/hooks";
 import { paths } from "@/routes/paths";
+import { useQueryClient } from "@tanstack/react-query";
 
 type Props = {
   tweet: Tweet;
@@ -61,6 +62,7 @@ const renderButtons = (
 export default function RenderTweetButtons({ tweet }: Props) {
   const { user, authenticated } = useAuthContext();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const [isLiked, setIsLiked] = useState<boolean>(
     !!tweet.likedBy?.find((u) => u.id === user?.id)
@@ -69,7 +71,7 @@ export default function RenderTweetButtons({ tweet }: Props) {
   const [totalLikes, setTotalLikes] = useState<number>(tweet.totalLikes);
 
   const handleLike = async () => {
-    if(!authenticated) router.push(paths.login());
+    if (!authenticated) router.push(paths.login());
 
     setIsLiked((prev) => !prev);
     setTotalLikes((prev) => (isLiked ? prev - 1 : prev + 1));
@@ -79,6 +81,12 @@ export default function RenderTweetButtons({ tweet }: Props) {
 
       setIsLiked(res.liked);
       setTotalLikes(res.totalLikes);
+
+      queryClient.invalidateQueries({ queryKey: ["tweets-feed"] });
+      queryClient.invalidateQueries({ queryKey: ["profile-tweets", user?.id] });
+      queryClient.invalidateQueries({
+        queryKey: ["profile-liked-tweets", user?.id],
+      });
     } catch (err) {
       setIsLiked((prev) => !prev);
       setTotalLikes((prev) => (isLiked ? prev + 1 : prev - 1));

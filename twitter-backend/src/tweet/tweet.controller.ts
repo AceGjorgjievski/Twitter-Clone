@@ -82,4 +82,17 @@ export class TweetController {
   }> {
     return this.tweeterService.likeTweet(Number(tweetId), body.userId);
   }
+
+  @Get('liked')
+  async getLikedTweets(
+    @CurrentUserDecorator() user: any,
+    @Query('limit') limit = 5,
+    @Query('cursor') cursor?: string,
+  ): Promise<PaginatedTweet> {
+    return this.tweeterService.findLikedByUser({
+      userId: user.id,
+      limit: Number(limit),
+      cursor,
+    });
+  }
 }

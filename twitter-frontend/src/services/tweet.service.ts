@@ -40,3 +40,14 @@ export async function likeTweet(tweetId: number, userId: number) {
 
   return res.data;
 }
+
+export async function loadLikedTweetsForCurrentUser(
+  limit = 5,
+  cursor?: string
+) {
+  const res = await axiosInstance.get<PaginatedTweet>(`${API_URL}/liked`, {
+    params: { limit, cursor },
+  });
+
+  return res.data;
+}

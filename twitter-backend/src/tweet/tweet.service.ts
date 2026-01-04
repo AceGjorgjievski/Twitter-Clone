@@ -202,4 +202,39 @@ export class TweetService {
       };
     });
   }
+
+  async findLikedByUser({
+    userId,
+    limit,
+    cursor,
+  }: {
+    userId: number;
+    limit: number;
+    cursor?: string;
+  }): Promise<PaginatedTweet> {
+    const cursorId = cursor ? Number(cursor) : undefined;
+
+    const tweets = await this.databaseService.tweet.findMany({
+      take: limit + 1,
+      where: {
+        likedBy: {
+          some: { id: userId },
+        },
+        ...(cursorId && { id: { lt: cursorId } }),
+      },
+      orderBy: { id: 'desc' },
+      include: {
+        author: true,
+        likedBy: true,
+      },
+    });
+
+    let nextCursor: string | null = null;
+    if (tweets.length > limit) {
+      nextCursor = tweets[limit - 1].id.toString();
+      tweets.splice(limit);
+    }
+
+    return { tweets, nextCursor };
+  }
 }
