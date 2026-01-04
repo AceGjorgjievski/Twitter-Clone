@@ -86,14 +86,50 @@ export class TweetService {
     return { tweets, nextCursor };
   }
 
-  async findAllForCurrentUser(userId: number): Promise<Tweet[]> {
-    return this.databaseService.tweet.findMany({
+  async findAllForCurrentUser(
+    userId: number,
+    limit = 5,
+    cursor?: string,
+  ): Promise<PaginatedTweet> {
+    const cursorId = cursor ? parseInt(cursor, 10) : undefined;
+
+    const tweets = await this.databaseService.tweet.findMany({
+      take: limit + 1,
       where: {
+        author: { id: userId },
+        ...(cursorId && { id: { lt: cursorId } }),
+      },
+      orderBy: [{ id: 'desc' }],
+      include: {
         author: {
-          id: userId,
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            profilePicture: true,
+            createdAt: true,
+          },
+        },
+        likedBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
         },
       },
     });
+
+    let nextCursor: string | null = null;
+
+    if (tweets.length > limit) {
+      const nextTweet = tweets[limit - 1];
+      nextCursor = nextTweet.id.toString();
+      tweets.splice(limit);
+    }
+
+    return { tweets, nextCursor };
   }
 
   async findOne(id: number) {

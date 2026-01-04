@@ -1,4 +1,4 @@
-import { ProfileView } from "@/sections/profile";
+import { ProfileView } from "@/sections/profile/view";
 
 
 export default function Profile() {

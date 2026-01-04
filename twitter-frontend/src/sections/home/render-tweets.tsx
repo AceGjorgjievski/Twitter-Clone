@@ -1,8 +1,8 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { loadTweets } from "@/services";
 import { Tweet } from "@/types";
 import { useEffect, useRef } from "react";
-import TweetItem from "./tweet-item";
+import TweetItem from "../../shared/components/tweet-item";
+import { useInfiniteTweets } from "@/hooks";
 
 type Props = {
   renderTweets: number;
@@ -10,22 +10,10 @@ type Props = {
 
 export default function RenderTweets({ renderTweets }: Props) {
   const loaderRef = useRef<HTMLDivElement>(null);
-  const limit = 5;
 
-  const {
-    data,
-    error,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-    status,
-  } = useInfiniteQuery({
-    queryKey: ["tweets", renderTweets],
-    queryFn: ({ pageParam }) => loadTweets(limit, pageParam),
-    initialPageParam: undefined,
-    getNextPageParam: (lastPage) => lastPage.nextCursor || null,
-  });
+  const { data, error, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isFetching } =
+  useInfiniteTweets(["tweets-feed"], loadTweets, 5);
+  const allTweets: Tweet[] = data?.pages.flatMap((page) => page.tweets) || [];
 
   useEffect(() => {
     if (!loaderRef.current || !hasNextPage) return;
@@ -49,14 +37,13 @@ export default function RenderTweets({ renderTweets }: Props) {
     return () => observer.unobserve(currentLoader);
   }, [hasNextPage, isFetching, isFetchingNextPage, fetchNextPage]);
 
-  const allTweets: Tweet[] = data?.pages.flatMap((page) => page.tweets) || [];
 
-  if (status === "pending") {
+  if (isLoading) {
     return <p>Loading initial tweets...</p>;
   }
 
   if (status === "error") {
-    return <p>Error: {error.message}</p>;
+    return <p>Error: {error?.message}</p>;
   }
 
   return (

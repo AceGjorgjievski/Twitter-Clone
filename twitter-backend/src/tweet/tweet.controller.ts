@@ -38,7 +38,9 @@ export class TweetController {
   @Get('currentUser')
   async getAllTweetForCurrentUser(
     @CurrentUserDecorator() user: any,
-  ): Promise<Tweet[]> {
+    @Query('limit') limit = 5,
+    @Query('cursor') cursor?: string,
+  ): Promise<PaginatedTweet> {
     return this.tweeterService.findAllForCurrentUser(user.id);
   }
 

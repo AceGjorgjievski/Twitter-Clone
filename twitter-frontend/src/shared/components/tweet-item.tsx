@@ -1,7 +1,7 @@
 import { TweetImageLayout } from "@/layouts/tweet-image";
 import { ImagePreviewModal, RenderTweetButtons } from "@/shared/components";
 import { Tweet } from "@/types";
-import { Box, Typography, Avatar, Stack } from "@mui/material";
+import { Box, Typography, Avatar, Stack, Card } from "@mui/material";
 import { useState } from "react";
 
 type Props = {
@@ -26,14 +26,14 @@ export default function TweetItem({ tweet }: Props) {
         }}
       >
         <Typography sx={{}} fontWeight="bold">
-          {tweet.author.name.split(" ")[0]}
+          {tweet.author?.name.split(" ")[0]}
         </Typography>
         <Typography
           sx={{
             color: "text.secondary",
           }}
         >
-          @{tweet.author.name.toLowerCase().replace(/\s+/g, "")}
+          @{tweet?.author?.name.toLowerCase().replace(/\s+/g, "")}
         </Typography>
         <Typography
           sx={{
@@ -48,11 +48,11 @@ export default function TweetItem({ tweet }: Props) {
             color: "text.secondary",
           }}
         >
-          {new Date(tweet.createdAt).toLocaleString()}
+          {new Date(tweet?.createdAt).toLocaleString()}
         </Typography>
       </Box>
 
-      <Typography>{tweet.description}</Typography>
+      <Typography>{tweet?.description}</Typography>
     </Stack>
   );
 
@@ -63,37 +63,45 @@ export default function TweetItem({ tweet }: Props) {
         minHeight: "100px",
       }}
     >
-      <Box
+      <Card
         sx={{
-          display: "flex",
-          padding: 2,
+          boxShadow: 5,
+          borderRadius: 3,
+          gap: 10,
         }}
       >
-        <Avatar
-          src={tweet.author.profilePicture}
-          alt={"/images/user-default-avatar.png"}
+        <Box
           sx={{
-            width: 40,
-            height: 40,
-            borderRadius: "50%",
-            backgroundColor: "#cfd9de",
-            flexShrink: 0,
+            display: "flex",
+            padding: 2,
           }}
-        />
-        {renderTweetInfo}
-      </Box>
+        >
+          <Avatar
+            src={tweet.author?.profilePicture}
+            alt={"/images/user-default-avatar.png"}
+            sx={{
+              width: 40,
+              height: 40,
+              borderRadius: "50%",
+              backgroundColor: "#cfd9de",
+              flexShrink: 0,
+            }}
+          />
+          {renderTweetInfo}
+        </Box>
 
-      <TweetImageLayout
-        images={tweet.images}
-        tweetId={tweet.id}
-        onImageClick={() => setModalOpen(true)}
-      />
-      <ImagePreviewModal
-        tweet={tweet}
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-      />
-      <RenderTweetButtons tweet={tweet} />
+        <TweetImageLayout
+          images={tweet.images}
+          tweetId={tweet.id}
+          onImageClick={() => setModalOpen(true)}
+        />
+        <ImagePreviewModal
+          tweet={tweet}
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+        />
+        <RenderTweetButtons tweet={tweet} />
+      </Card>
     </Box>
   );
 }
