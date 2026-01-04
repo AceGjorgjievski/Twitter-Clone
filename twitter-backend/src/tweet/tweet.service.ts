@@ -237,4 +237,31 @@ export class TweetService {
 
     return { tweets, nextCursor };
   }
+
+  async findById(tweetId: number): Promise<Tweet> {
+    return this.databaseService.tweet.findFirst({
+      where: {
+        id: tweetId,
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            profilePicture: true,
+            createdAt: true,
+          },
+        },
+        likedBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+  }
 }

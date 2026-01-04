@@ -1,4 +1,4 @@
-import { PaginatedTweet } from "@/types";
+import { PaginatedTweet, Tweet } from "@/types";
 import { BACKEND_API } from "../../config-global";
 import axiosInstance from "@/utils/axios";
 
@@ -48,6 +48,12 @@ export async function loadLikedTweetsForCurrentUser(
   const res = await axiosInstance.get<PaginatedTweet>(`${API_URL}/liked`, {
     params: { limit, cursor },
   });
+
+  return res.data;
+}
+
+export async function loadTweet(tweetId: number) {
+  const res = await axiosInstance.get<Tweet>(`${API_URL}/${tweetId}/details`);
 
   return res.data;
 }

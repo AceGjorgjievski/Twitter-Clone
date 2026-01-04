@@ -17,7 +17,10 @@ export default function SingleImage({ images, onImageClick }: Props) {
         justifyContent: "center",
         cursor: "pointer",
       }}
-      onClick={onImageClick}
+      onClick={(e) => {
+        e.stopPropagation();
+        onImageClick();
+      }}
     >
       <Box
         sx={{

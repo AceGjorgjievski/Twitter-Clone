@@ -6,6 +6,7 @@ import { useState } from "react";
 
 type Props = {
   tweet: Tweet;
+  onImageClick?: (e: React.MouseEvent) => void;
 };
 
 export default function TweetItem({ tweet }: Props) {

@@ -33,7 +33,10 @@ export default function TwoImages({
             border: "1px solid #eee",
             cursor: "pointer",
           }}
-          onClick={onImageClick}
+          onClick={(e) => {
+            e.stopPropagation();
+            onImageClick();
+          }}
         >
           <Image
             src={`http://localhost:4000${img}`}

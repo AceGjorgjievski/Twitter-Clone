@@ -77,14 +77,17 @@ export default function ImagePreviewModal({
             color: "#fff",
             border: "1px solid white",
           }}
-          onClick={prevImage}
+          onClick={(e) => {
+            e.stopPropagation();
+            prevImage();
+          }}
         >
           ◀
         </Button>
       )}
     </>
   );
-  
+
   const renderNextButton = (
     <>
       {currentIndex !== null && currentIndex < imagesToShow.length - 1 && (
@@ -102,7 +105,10 @@ export default function ImagePreviewModal({
             width: 40,
             height: 40,
           }}
-          onClick={nextImage}
+          onClick={(e) => {
+            e.stopPropagation();
+            nextImage();
+          }}
         >
           ▶
         </Button>
@@ -123,7 +129,10 @@ export default function ImagePreviewModal({
         color: "#fff",
         border: "1px solid white",
       }}
-      onClick={onClose}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClose();
+      }}
     >
       ✕
     </Button>
@@ -139,6 +148,7 @@ export default function ImagePreviewModal({
         alignItems: "center",
         justifyContent: "center",
       }}
+      onClick={(e) => e.stopPropagation()}
     >
       <Box
         sx={{

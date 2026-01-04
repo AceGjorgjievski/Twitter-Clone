@@ -4,5 +4,6 @@ export const paths = {
     home: () => `/`,
     notifications: () => `/notifications`,
     messages: () => `/messages`,
-    profile: () => `/profile`
+    profile: () => `/profile`,
+    tweetDetails: (id: number) => `/tweet/${id}`
 }

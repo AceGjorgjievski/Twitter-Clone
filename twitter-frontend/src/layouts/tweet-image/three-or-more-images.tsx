@@ -143,7 +143,10 @@ export default function ThreeOrMoreImages({
         height: 300,
         cursor: "pointer",
       }}
-      onClick={onImageClick}
+      onClick={(e) => {
+        e.stopPropagation();
+        onImageClick();
+      }}
     >
       {firstImage}
       <Box

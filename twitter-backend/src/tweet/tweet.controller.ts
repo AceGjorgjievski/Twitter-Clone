@@ -95,4 +95,9 @@ export class TweetController {
       cursor,
     });
   }
+
+  @Get(':id/details')
+  async getTweet(@Param('id') tweetId: string): Promise<Tweet> {
+    return this.tweeterService.findById(+tweetId);
+  }
 }

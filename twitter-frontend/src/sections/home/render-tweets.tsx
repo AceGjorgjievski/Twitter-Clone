@@ -3,9 +3,12 @@ import { Tweet } from "@/types";
 import { useEffect, useRef } from "react";
 import TweetItem from "../../shared/components/tweet-item";
 import { useInfiniteTweets } from "@/hooks";
+import { useRouter } from "@/routes/hooks";
+import { paths } from "@/routes/paths";
 
 export default function RenderTweets() {
   const loaderRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const {
     data,
@@ -52,7 +55,13 @@ export default function RenderTweets() {
     <>
       <div>
         {allTweets.map((tweet) => (
-          <TweetItem key={tweet.id} tweet={tweet} />
+          <div
+            key={tweet.id}
+            onClick={() => router.push(paths.tweetDetails(tweet.id))}
+            style={{ cursor: "pointer" }}
+          >
+            <TweetItem tweet={tweet} />
+          </div>
         ))}
       </div>
 
