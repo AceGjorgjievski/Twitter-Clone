@@ -59,15 +59,14 @@ export default function TweetItem({ tweet }: Props) {
   return (
     <Box
       sx={{
-        border: "1px solid #ccc",
         minHeight: "100px",
+        marginBottom: "1rem"
       }}
     >
       <Card
         sx={{
           boxShadow: 5,
           borderRadius: 3,
-          gap: 10,
         }}
       >
         <Box

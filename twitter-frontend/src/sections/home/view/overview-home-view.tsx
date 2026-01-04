@@ -2,13 +2,13 @@
 
 import { Box, Typography } from "@mui/material";
 import RenderTweets from "../render-tweets";
-import { useState } from "react";
 import CreateTweet from "../create-tweet";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function HomeView() {
-  const [refresh, setRefresh] = useState(0);
+  const queryClient = useQueryClient();
   const onTweetCreated = () => {
-    setRefresh((prev) => prev + 1);
+    queryClient.invalidateQueries({ queryKey: ["tweets-feed"] });
   };
 
   return (
@@ -29,7 +29,7 @@ export default function HomeView() {
         </Typography>
         <CreateTweet onTweetCreated={onTweetCreated} />
       </Box>
-      <RenderTweets renderTweets={refresh} />
+      <RenderTweets />
     </>
   );
 }

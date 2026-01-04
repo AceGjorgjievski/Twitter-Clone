@@ -120,17 +120,12 @@ export default function ProfileSubView({ user, tweets }: Props) {
   );
 
   const renderProfileTweets = (
-    <Card
-      sx={{
-        boxShadow: 5,
-        borderRadius: 3,
-      }}
-    >
+    <>
       <CardHeader title="My Tweets" />
       {tweets.map((tweet) => (
         <TweetItem key={tweet.id} tweet={tweet} />
       ))}
-    </Card>
+    </>
   );
 
   return (
@@ -150,7 +145,7 @@ export default function ProfileSubView({ user, tweets }: Props) {
         </Grid>
 
         <Grid component={"div"} size={{ xs: 12, md: 8 }}>
-          <Stack spacing={4}>{renderProfileTweets}</Stack>
+          <Stack spacing={3}>{renderProfileTweets}</Stack>
         </Grid>
       </Grid>
     </>
