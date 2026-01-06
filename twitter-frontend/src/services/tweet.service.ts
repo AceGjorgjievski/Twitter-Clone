@@ -22,6 +22,15 @@ export async function loadTweets(limit = 5, cursor?: string) {
   return res.data;
 }
 
+export async function loadTweetsWhenUserLoggedIn(limit = 5, cursor?: string) {
+  const res = await axiosInstance.get<PaginatedTweet>(`${API_URL}/loggedIn`, {
+    params: { limit, cursor },
+  });
+
+  return res.data;
+}
+
+
 export async function loadTweetsForCurrentUser(limit = 5, cursor?: string) {
   const res = await axiosInstance.get<PaginatedTweet>(
     `${API_URL}/currentUser`,
@@ -54,6 +63,20 @@ export async function loadLikedTweetsForCurrentUser(
 
 export async function loadTweet(tweetId: number) {
   const res = await axiosInstance.get<Tweet>(`${API_URL}/${tweetId}/details`);
+
+  return res.data;
+}
+
+export async function retweet(tweetId: number, formData: FormData) {
+  const res = await axiosInstance.post<{ retweeted: boolean; tweet?: Tweet }>(
+    `${API_URL}/${tweetId}/retweet`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
 
   return res.data;
 }

@@ -35,6 +35,21 @@ export class TweetController {
     });
   }
 
+  @Get('loggedIn')
+  async getAllTweetsWhenUserLoggedIn(
+    @Query('limit') limit = 5,
+    @Query('cursor') cursor?: string,
+    @CurrentUserDecorator() user?: any,
+  ): Promise<PaginatedTweet> {
+    return this.tweeterService.findAllPaginated(
+      {
+        limit: Number(limit),
+        cursor,
+      },
+      +user?.id,
+    );
+  }
+
   @Get('currentUser')
   async getAllTweetForCurrentUser(
     @CurrentUserDecorator() user: any,
@@ -96,8 +111,37 @@ export class TweetController {
     });
   }
 
+  @Public()
   @Get(':id/details')
   async getTweet(@Param('id') tweetId: string): Promise<Tweet> {
     return this.tweeterService.findById(+tweetId);
+  }
+
+  @Post(':id/retweet')
+  @UseInterceptors(
+    FilesInterceptor('images', 5, {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, uniqueName + extname(file.originalname));
+        },
+      }),
+    }),
+  )
+  async retweet(
+    @Param('id') tweetId: string,
+    @UploadedFiles() files: Express.Multer.File[],
+    @Body() dto: { description?: string },
+    @CurrentUserDecorator() user: any,
+  ): Promise<{ retweeted: boolean; tweet?: Tweet }> {
+    const imageUrls = files?.map((file) => `/uploads/${file.filename}`) || [];
+
+    return this.tweeterService.retweetTweet(
+      Number(tweetId),
+      user.id,
+      dto.description,
+      imageUrls,
+    );
   }
 }

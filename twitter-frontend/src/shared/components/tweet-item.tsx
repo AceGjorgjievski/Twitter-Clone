@@ -1,7 +1,7 @@
 import { TweetImageLayout } from "@/layouts/tweet-image";
 import { ImagePreviewModal, RenderTweetButtons } from "@/shared/components";
 import { Tweet } from "@/types";
-import { Box, Typography, Avatar, Stack, Card } from "@mui/material";
+import { Box, Typography, Avatar, Stack, Card, Link } from "@mui/material";
 import { useState } from "react";
 
 type Props = {
@@ -47,9 +47,12 @@ export default function TweetItem({ tweet }: Props) {
         <Typography
           sx={{
             color: "text.secondary",
+            fontSize: 15,
           }}
         >
-          {new Date(tweet?.createdAt).toLocaleString()}
+          {new Date(
+            tweet?.createdAt ?? tweet?.retweetOf?.createdAt
+          ).toLocaleString()}
         </Typography>
       </Box>
 
@@ -57,11 +60,39 @@ export default function TweetItem({ tweet }: Props) {
     </Stack>
   );
 
+  const renderRetweetInfo = (
+    <>
+      {tweet.retweetOf ? (
+        <Box sx={{ borderLeft: "2px solid #eee", ml: 6, pl: 2 }}>
+          <Typography variant="body2" color="text.secondary">
+            Retweeted
+          </Typography>
+
+          <Typography variant="body2" color="text.primary">
+            {tweet.retweetOf?.description}
+          </Typography>
+
+          <Link href={`/tweet/${tweet.retweetOf.id}`}>View original tweet</Link>
+          <TweetImageLayout
+            images={tweet.images}
+            tweetId={tweet.retweetOf.id}
+            onImageClick={() => setModalOpen(true)}
+          />
+          <ImagePreviewModal
+            tweet={tweet}
+            open={modalOpen}
+            onClose={() => setModalOpen(false)}
+          />
+        </Box>
+      ) : null}
+    </>
+  );
+
   return (
     <Box
       sx={{
         minHeight: "100px",
-        marginBottom: "1rem"
+        marginBottom: "1rem",
       }}
     >
       <Card
@@ -100,6 +131,8 @@ export default function TweetItem({ tweet }: Props) {
           open={modalOpen}
           onClose={() => setModalOpen(false)}
         />
+        {renderRetweetInfo}
+
         <RenderTweetButtons tweet={tweet} />
       </Card>
     </Box>

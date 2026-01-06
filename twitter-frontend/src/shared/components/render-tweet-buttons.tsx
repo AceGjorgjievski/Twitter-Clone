@@ -6,13 +6,14 @@ import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 
 import { useAuthContext } from "@/auth/hooks";
-import { likeTweet } from "@/services";
+import { likeTweet, retweet } from "@/services";
 import { Tweet } from "@/types";
 
 import { JSX, useState } from "react";
 import { useRouter } from "@/routes/hooks";
 import { paths } from "@/routes/paths";
 import { useQueryClient } from "@tanstack/react-query";
+import RetweetModal from "./retweet-modal";
 
 type Props = {
   tweet: Tweet;
@@ -30,6 +31,7 @@ const renderButtons = (
   isLiked: boolean,
   tweet: Tweet,
   totalLikes: number,
+  retweetedCount: number,
   handlers: {
     onLike: () => void;
     onComment: () => void;
@@ -54,7 +56,7 @@ const renderButtons = (
     key: "repost",
     icon: <AutorenewIcon />,
     hoverColor: colors.green[600],
-    totalCount: tweet.comments?.length,
+    totalCount: retweetedCount,
     onClick: handlers.onRepost,
   },
 ];
@@ -64,11 +66,20 @@ export default function RenderTweetButtons({ tweet }: Props) {
   const router = useRouter();
   const queryClient = useQueryClient();
 
+  const [previewUpdateTrigger, setPreviewUpdateTrigger] = useState(0);
   const [isLiked, setIsLiked] = useState<boolean>(
     !!tweet.likedBy?.find((u) => u.id === user?.id)
   );
-
+  const [open, setOpen] = useState(false);
+  const [isRetweeted, setIsRetweeted] = useState<boolean>(tweet.isRetweeted);
   const [totalLikes, setTotalLikes] = useState<number>(tweet.totalLikes);
+  const displayRetweetCount = tweet.retweetOf
+    ? tweet.retweetOf.retweetCount
+    : tweet.retweetCount;
+
+  const triggerUpdate = () => {
+    setPreviewUpdateTrigger((prev) => prev + 1);
+  };
 
   const handleLike = async () => {
     if (!authenticated) router.push(paths.login());
@@ -93,19 +104,87 @@ export default function RenderTweetButtons({ tweet }: Props) {
     }
   };
 
-  const handleComment = () => {
-    console.log("comment");
+  const handleComment = () => {};
+
+  const handleRetweetSubmit = async (description?: string, images?: File[]) => {
+    try {
+      const formData = new FormData();
+
+      if (description) {
+        formData.append("description", description);
+      }
+
+      if (images) {
+        images.forEach((image) => {
+          formData.append("images", image);
+        });
+      }
+
+      const res = await retweet(tweet.id, formData);
+      if (res) {
+        setIsRetweeted(res.retweeted);
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["tweets-feed"] });
+      queryClient.invalidateQueries({ queryKey: ["profile-tweets", user?.id] });
+      triggerUpdate();
+      setOpen(false);
+    } catch (err) {
+      console.error("Retweet failed", err);
+      setIsRetweeted((prev) => !prev);
+    }
   };
 
-  const handleRepost = () => {
-    console.log("repost");
+  const handleRepost = async () => {
+    if (!authenticated) {
+      router.push(paths.login());
+      return;
+    }
+
+    if (isRetweeted) {
+      setIsRetweeted(false);
+
+      try {
+        const res = await retweet(tweet.id, new FormData());
+        setIsRetweeted(res.retweeted);
+        if (!res.retweeted) {
+          queryClient.invalidateQueries({ queryKey: ["tweets-feed"] });
+          queryClient.invalidateQueries({
+            queryKey: ["profile-tweets", user?.id],
+          });
+        }
+      } catch (err) {
+        setIsRetweeted(true);
+      }
+      return;
+    }
+
+    setOpen(true);
   };
 
-  const buttons = renderButtons(isLiked, tweet, totalLikes, {
-    onLike: handleLike,
-    onComment: handleComment,
-    onRepost: handleRepost,
-  });
+  const buttons = renderButtons(
+    isLiked,
+    tweet,
+    totalLikes,
+    displayRetweetCount,
+    {
+      onLike: handleLike,
+      onComment: handleComment,
+      onRepost: handleRepost,
+    }
+  );
+
+  const getButtonColor = (key: string) => {
+    if (key === "like" && isLiked) return colors.pink[800];
+    if (
+      key === "repost" &&
+      isRetweeted &&
+      tweet &&
+      tweet?.author?.id === user?.id
+    )
+      return colors.green[600];
+    return "text.secondary";
+  };
 
   return (
     <Box
@@ -123,13 +202,13 @@ export default function RenderTweetButtons({ tweet }: Props) {
         >
           <Tooltip title={btn.key} arrow>
             <Box
-              onClick={btn.onClick}
+              onClick={(e) => {
+                e.stopPropagation();
+                btn.onClick();
+              }}
               sx={{
                 cursor: "pointer",
-                color:
-                  btn.key === "like" && isLiked
-                    ? colors.pink[800]
-                    : "text.secondary",
+                color: getButtonColor(btn.key),
                 "&:hover": {
                   color: btn.hoverColor,
                 },
@@ -146,6 +225,14 @@ export default function RenderTweetButtons({ tweet }: Props) {
           )}
         </Box>
       ))}
+      <RetweetModal
+        tweet={tweet}
+        open={open}
+        onClose={() => setOpen(false)}
+        onSubmit={(description, images) => {
+          handleRetweetSubmit(description, images);
+        }}
+      />
     </Box>
   );
 }

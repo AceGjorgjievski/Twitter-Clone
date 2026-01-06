@@ -6,10 +6,13 @@ export type Tweet = {
     description: string;
     images: string[];
     totalLikes: number;
+    retweetOfId?: number;
     createdAt: Date;
     author: User;
 
     comments?: Comment[];
     likedBy?: User[];
-    retweetedBy?: User[];
+    retweetOf?: Tweet;
+    retweetCount: number;
+    isRetweeted: boolean;
 }

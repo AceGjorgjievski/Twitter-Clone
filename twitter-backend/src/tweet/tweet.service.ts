@@ -37,22 +37,21 @@ export class TweetService {
     });
   }
 
-  async findAllPaginated({
-    limit,
-    cursor,
-  }: {
-    limit: number;
-    cursor?: string;
-  }): Promise<PaginatedTweet> {
+  async findAllPaginated(
+    {
+      limit,
+      cursor,
+    }: {
+      limit: number;
+      cursor?: string;
+    },
+    userId?: number,
+  ): Promise<PaginatedTweet> {
     const cursorId = cursor ? parseInt(cursor, 10) : undefined;
 
     const tweets = await this.databaseService.tweet.findMany({
       take: limit + 1,
-      where: cursorId
-        ? {
-            id: { lt: cursorId },
-          }
-        : undefined,
+      where: cursorId ? { id: { lt: cursorId } } : undefined,
       orderBy: [{ id: 'desc' }],
       include: {
         author: {
@@ -72,18 +71,83 @@ export class TweetService {
             email: true,
           },
         },
+        _count: {
+          select: {
+            retweets: true,
+          },
+        },
+        retweetOf: {
+          include: {
+            author: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                profilePicture: true,
+              },
+            },
+            _count: {
+              select: {
+                retweets: true,
+              },
+            },
+          },
+        },
       },
     });
 
     let nextCursor: string | null = null;
-
     if (tweets.length > limit) {
       const nextTweet = tweets[limit - 1];
       nextCursor = nextTweet.id.toString();
       tweets.splice(limit);
     }
 
-    return { tweets, nextCursor };
+    if (!userId) {
+      const normalizedTweets = tweets.map(({ _count, ...tweet }) => ({
+        ...tweet,
+        retweetCount: _count.retweets,
+        isRetweeted: false,
+      }));
+      return {
+        tweets: normalizedTweets,
+        nextCursor,
+      };
+    }
+
+    const tweetIds = tweets.map((t) => t.id);
+
+    const userRetweets = await this.databaseService.tweet.findMany({
+      where: {
+        authorId: userId,
+        retweetOfId: { in: tweetIds },
+      },
+      select: {
+        retweetOfId: true,
+      },
+    });
+
+    const retweetedTweetIds = new Set(userRetweets.map((r) => r.retweetOfId));
+
+    const normalizedTweets = tweets.map(({ _count, retweetOf, ...tweet }) => ({
+      ...tweet,
+      retweetCount: _count.retweets,
+      retweetOf: retweetOf
+        ? {
+            ...retweetOf,
+            retweetCount: retweetOf._count.retweets,
+          }
+        : null,
+      isRetweeted:
+        retweetedTweetIds.has(tweet.id) ||
+        (tweet.retweetOfId !== null &&
+          retweetedTweetIds.has(tweet.retweetOfId)),
+    }));
+
+    return {
+      tweets: normalizedTweets,
+      nextCursor,
+    };
   }
 
   async findAllForCurrentUser(
@@ -116,6 +180,22 @@ export class TweetService {
             id: true,
             name: true,
             email: true,
+          },
+        },
+        retweetOf: {
+          select: {
+            id: true,
+            description: true,
+            images: true,
+            createdAt: true,
+            author: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                profilePicture: true,
+              },
+            },
           },
         },
       },
@@ -261,7 +341,125 @@ export class TweetService {
             email: true,
           },
         },
+        retweetOf: {
+          select: {
+            id: true,
+            description: true,
+            images: true,
+            createdAt: true,
+            author: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+        },
       },
+    });
+  }
+
+  async retweetTweet(
+    tweetId: number,
+    userId: number,
+    description?: string,
+    images: string[] = [],
+  ): Promise<{ retweeted: boolean; tweet?: Tweet }> {
+    return this.databaseService.$transaction(async (prisma) => {
+      // Fetch the tweet to retweet
+      const tweet = await prisma.tweet.findUnique({
+        where: { id: tweetId },
+        select: { id: true, retweetOfId: true, retweetCount: true },
+      });
+
+      console.log('tweet for retweeting: ', tweet);
+
+      if (!tweet) throw new Error('Tweet not found');
+
+      const originalTweetId = tweet.retweetOfId ?? tweet.id;
+
+      // Check if the user has already retweeted this tweet
+      const existing = await prisma.tweet.findFirst({
+        where: {
+          authorId: userId,
+          retweetOfId: originalTweetId,
+        },
+      });
+
+      console.log('existing retweet: ', existing);
+
+      if (existing) {
+        // Undo the retweet by deleting the existing retweet and decrementing the retweetCount
+        await this.databaseService.tweet.delete({
+          where: { id: existing.id },
+        });
+
+        // Safely decrement retweetCount, ensuring it doesn't go below zero
+        const respond = await prisma.tweet.update({
+          where: { id: originalTweetId },
+          data: {
+            retweetCount: {
+              decrement: 1,
+            },
+          },
+        });
+
+        console.log('descrement: ', respond);
+        return { retweeted: false, tweet: respond };
+      }
+
+      // Create a new retweet
+
+      // Increment the retweetCount on the original tweet
+      const updated = await prisma.tweet.update({
+        where: { id: originalTweetId },
+        data: {
+          retweetCount: {
+            increment: 1,
+          },
+        },
+      });
+
+      const newRetweet = await prisma.tweet.create({
+        data: {
+          description: description || null,
+          images,
+          author: { connect: { id: userId } },
+          retweetOf: { connect: { id: originalTweetId } },
+        },
+        include: {
+          author: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              profilePicture: true,
+            },
+          },
+          retweetOf: {
+            include: {
+              author: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  profilePicture: true,
+                },
+              },
+            },
+          },
+          likedBy: true,
+        },
+      });
+      console.log('new retweet created: ', newRetweet);
+
+      console.log('updated retweet count: ', updated);
+
+      return {
+        retweeted: true,
+        tweet: newRetweet,
+      };
     });
   }
 }

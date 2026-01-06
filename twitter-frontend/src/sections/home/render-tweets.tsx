@@ -1,15 +1,18 @@
-import { loadTweets } from "@/services";
+import { loadTweets, loadTweetsWhenUserLoggedIn } from "@/services";
 import { Tweet } from "@/types";
 import { useEffect, useRef } from "react";
 import TweetItem from "../../shared/components/tweet-item";
 import { useInfiniteTweets } from "@/hooks";
 import { useRouter } from "@/routes/hooks";
 import { paths } from "@/routes/paths";
+import { useAuthContext } from "@/auth/hooks";
 
 export default function RenderTweets() {
   const loaderRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
+  const { authenticated } = useAuthContext();
+  const queryKey = ["tweets-feed", authenticated ? "loggedIn" : "anonymous"];
   const {
     data,
     error,
@@ -18,7 +21,11 @@ export default function RenderTweets() {
     isFetchingNextPage,
     isLoading,
     isFetching,
-  } = useInfiniteTweets(["tweets-feed"], loadTweets, 5);
+  } = useInfiniteTweets(
+    queryKey,
+    authenticated ? loadTweetsWhenUserLoggedIn : loadTweets,
+    5
+  );
   const allTweets: Tweet[] = data?.pages.flatMap((page) => page.tweets) || [];
 
   useEffect(() => {

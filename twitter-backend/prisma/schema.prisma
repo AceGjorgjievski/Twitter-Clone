@@ -10,44 +10,50 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id Int @id @default(autoincrement())
-  name String @unique
-  email String @unique
-  password String
-  role String @default("user")
+  id             Int      @id @default(autoincrement())
+  name           String   @unique
+  email          String   @unique
+  password       String
+  role           String   @default("user")
   profilePicture String?
-  createdAt DateTime @default(now())
+  createdAt      DateTime @default(now())
 
-  tweets Tweet[] @relation("AuthorTweet")
+  tweets      Tweet[] @relation("AuthorTweet")
   likedTweets Tweet[] @relation("LikedTweets")
-  reTweets Tweet[] @relation("ReTweets")
 }
 
 model Tweet {
-  id Int @id @default(autoincrement())
-  description String @db.VarChar(280)
-  images String[]
+  id          Int      @id @default(autoincrement())
+  description String?  @db.VarChar(280)
+  images      String[]
+  createdAt   DateTime @default(now())
+
+  authorId Int?
+  author   User? @relation("AuthorTweet", fields: [authorId], references: [id])
+
+  likedBy    User[] @relation("LikedTweets")
+  totalLikes Int    @default(0)
+
+  retweetOfId Int?
+  retweetOf   Tweet?  @relation("RetweetRelation", fields: [retweetOfId], references: [id])
+  retweets    Tweet[] @relation("RetweetRelation")
+
+  retweetCount Int @default(0)
+
   comments Comment[]
-  totalLikes Int @default(0)
 
-  author_id Int
-  author User @relation(fields: [author_id], references: [id], name: "AuthorTweet")
-
-  likedBy User[] @relation("LikedTweets")
-  reTweetedBy User[] @relation("ReTweets")
-
-  createdAt DateTime @default(now())
   @@index([createdAt])
+  @@index([retweetOfId])
 }
 
 model Comment {
-  id Int @id @default(autoincrement())
-  author_id Int
+  id          Int    @id @default(autoincrement())
+  author_id   Int
   description String @db.VarChar(280)
-  tweetId Int
-  tweet Tweet @relation(fields: [tweetId], references: [id])
+  tweetId     Int
+  tweet       Tweet  @relation(fields: [tweetId], references: [id])
 }
