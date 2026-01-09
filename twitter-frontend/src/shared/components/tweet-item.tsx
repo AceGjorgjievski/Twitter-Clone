@@ -1,16 +1,82 @@
+
+import { Box, Typography, Avatar, Stack, Card, Link } from "@mui/material";
+
+import ActionsMenu from "./actions-menu";
+import RetweetModal from "./retweet-modal";
+
 import { TweetImageLayout } from "@/layouts/tweet-image";
 import { ImagePreviewModal, RenderTweetButtons } from "@/shared/components";
 import { Tweet } from "@/types";
-import { Box, Typography, Avatar, Stack, Card, Link } from "@mui/material";
+
+import { deleteTweet, editTweet } from "@/services";
+import { useTweetQueries } from "@/hooks";
 import { useState } from "react";
+import { useAuthContext } from "@/auth/hooks";
+
 
 type Props = {
   tweet: Tweet;
   onImageClick?: (e: React.MouseEvent) => void;
+  disabledButtons?: boolean;
 };
 
-export default function TweetItem({ tweet }: Props) {
-  const [modalOpen, setModalOpen] = useState(false);
+export default function TweetItem({ tweet, disabledButtons = false }: Props) {
+  const [imageModalOpen, setImageModalOpen] = useState<boolean>(false);
+  const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
+  const { authenticated, user } = useAuthContext();
+  const { refreshAllTweetData, refreshTweet } = useTweetQueries(
+    Number(user?.id)
+  );
+
+  const handleEdit = () => {
+    setEditModalOpen(true);
+  };
+
+  const handleClose = () => {
+    setEditModalOpen(false);
+  };
+
+  const handleEditSubmit = async (description?: string, images?: File[]) => {
+    try {
+      const formData = new FormData();
+
+      if (description) {
+        formData.append("description", description);
+      }
+
+      if (images) {
+        images.forEach((image) => {
+          formData.append("images", image);
+        });
+      }
+
+      const res = await editTweet(tweet.id, formData);
+      await Promise.all([refreshAllTweetData(), refreshTweet(tweet.id)]);
+    } catch (err) {
+      console.error("Edit failed", err);
+    }
+  };
+
+  const handleImagePreviewClose = () => {
+    setEditModalOpen(false);
+    setImageModalOpen(false);
+  };
+
+  const handleDelete = async () => {
+    await deleteTweet(tweet.id);
+    await refreshAllTweetData();
+  };
+
+  const actionItems = [
+    {
+      label: "Edit",
+      onClick: handleEdit,
+    },
+    {
+      label: "Delete",
+      onClick: handleDelete,
+    },
+  ];
 
   const renderTweetInfo = (
     <Stack
@@ -24,6 +90,9 @@ export default function TweetItem({ tweet }: Props) {
         sx={{
           display: "flex",
           gap: 1,
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
         }}
       >
         <Typography sx={{}} fontWeight="bold">
@@ -54,6 +123,20 @@ export default function TweetItem({ tweet }: Props) {
             tweet?.createdAt ?? tweet?.retweetOf?.createdAt
           ).toLocaleString()}
         </Typography>
+
+        {authenticated && tweet.author.id === user?.id && !disabledButtons && (
+          <ActionsMenu options={actionItems} />
+        )}
+
+        <RetweetModal
+          tweet={tweet}
+          open={editModalOpen}
+          isEdit={true}
+          onClose={handleClose}
+          onSubmit={(description, images) => {
+            handleEditSubmit(description, images);
+          }}
+        />
       </Box>
 
       <Typography>{tweet?.description}</Typography>
@@ -73,16 +156,16 @@ export default function TweetItem({ tweet }: Props) {
           </Typography>
 
           <Link href={`/tweet/${tweet.retweetOf.id}`}>View original tweet</Link>
-          <TweetImageLayout
+          {/* <TweetImageLayout
             images={tweet.images}
             tweetId={tweet.retweetOf.id}
-            onImageClick={() => setModalOpen(true)}
-          />
-          <ImagePreviewModal
+            onImageClick={() => setImageModalOpen(true)}
+          /> */}
+          {/* <ImagePreviewModal
             tweet={tweet}
-            open={modalOpen}
-            onClose={() => setModalOpen(false)}
-          />
+            open={imageModalOpen}
+            onClose={() => setImageModalOpen(false)}
+          /> */}
         </Box>
       ) : null}
     </>
@@ -124,16 +207,16 @@ export default function TweetItem({ tweet }: Props) {
         <TweetImageLayout
           images={tweet.images}
           tweetId={tweet.id}
-          onImageClick={() => setModalOpen(true)}
+          onImageClick={() => setImageModalOpen(true)}
         />
         <ImagePreviewModal
           tweet={tweet}
-          open={modalOpen}
-          onClose={() => setModalOpen(false)}
+          open={imageModalOpen}
+          onClose={handleImagePreviewClose}
         />
         {renderRetweetInfo}
 
-        <RenderTweetButtons tweet={tweet} />
+        <RenderTweetButtons tweet={tweet} disabledButtons={disabledButtons} />
       </Card>
     </Box>
   );

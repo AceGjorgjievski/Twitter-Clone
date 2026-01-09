@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Box,
   Modal,
@@ -18,12 +18,14 @@ import ImageIcon from "@mui/icons-material/Image";
 import ImagePreviewer from "@/sections/home/image-previewer";
 import EmojiEmotionsOutlinedIcon from "@mui/icons-material/EmojiEmotionsOutlined";
 import { EMOJIS } from "@/sections/home/emojis-data";
+import { urlToFile } from "@/utils/helpers/file.helper";
 
 type Props = {
   tweet: Tweet;
   open: boolean;
   onClose: () => void;
   onSubmit?: (description?: string, images?: File[]) => void;
+  isEdit?: boolean;
 };
 
 export default function RetweetModal({
@@ -31,20 +33,37 @@ export default function RetweetModal({
   open,
   onClose,
   onSubmit,
+  isEdit = false,
 }: Props) {
   const { user } = useAuthContext();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState(
+    isEdit ? tweet.description : ""
+  );
   const [emojiAnchor, setEmojiAnchor] = useState<HTMLElement | null>(null);
   const imagePreviewsRef = useRef<string[]>([]);
   const [images, setImages] = useState<File[]>([]);
-  const [previewUpdateTrigger, setPreviewUpdateTrigger] = useState(0);
-  
-  const triggerUpdate = () => {
-    setPreviewUpdateTrigger((prev) => prev + 1);
-  };
+
+  useEffect(() => {
+    if (!isEdit || !tweet.images?.length) return;
+
+    const loadImages = async () => {
+      const files = await Promise.all(
+        tweet.images.map((url) => urlToFile(url))
+      );
+
+      setImages(files);
+
+      imagePreviewsRef.current = tweet.images.map(
+        (url) => `${process.env.NEXT_PUBLIC_BACKEND_ROOT_API}${url}`
+      );
+
+    };
+
+    loadImages();
+  }, [isEdit, tweet.images]);
 
   const handlePost = () => {
     onSubmit?.(description, images);
@@ -65,7 +84,6 @@ export default function RetweetModal({
 
     setImages((prev) => [...prev, ...selectedFiles]);
 
-    triggerUpdate();
 
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -80,8 +98,6 @@ export default function RetweetModal({
     );
 
     setImages((prev) => prev.filter((_, i) => i !== index));
-
-    triggerUpdate();
   };
 
   const renderButtons = (
@@ -170,13 +186,15 @@ export default function RetweetModal({
         }}
       >
         <Stack direction="row" spacing={2} alignItems="flex-start">
-          <Avatar
-            src={
-              typeof user?.profilePicture === "string"
-                ? user.profilePicture
-                : "/images/user-default-avatar.png"
-            }
-          />
+          {!isEdit && (
+            <Avatar
+              src={
+                typeof user?.profilePicture === "string"
+                  ? user.profilePicture
+                  : "/images/user-default-avatar.png"
+              }
+            />
+          )}
           <TextField
             fullWidth
             multiline
@@ -203,7 +221,7 @@ export default function RetweetModal({
             pl: 2,
           }}
         >
-          <TweetItem tweet={tweet} />
+          {!isEdit && <TweetItem tweet={tweet} disabledButtons={true} />}
         </Box>
 
         {renderButtons}
@@ -216,7 +234,7 @@ export default function RetweetModal({
         >
           <Button onClick={onClose}>Cancel</Button>
           <Button variant="contained" onClick={handlePost}>
-            Post
+            {isEdit ? "Update" : "Post"}
           </Button>
         </Stack>
       </Box>

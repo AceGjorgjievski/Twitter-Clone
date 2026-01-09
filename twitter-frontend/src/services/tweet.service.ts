@@ -80,3 +80,23 @@ export async function retweet(tweetId: number, formData: FormData) {
 
   return res.data;
 }
+
+export async function deleteTweet(tweetId: number) {
+  const res = await axiosInstance.delete<{deleted: boolean}>(`${API_URL}/${tweetId}/delete`);
+
+  return res.data;
+}
+
+export async function editTweet(tweetId:number, formData: FormData) {
+  const res = await axiosInstance.put<{updated: boolean, tweet: Tweet}>(
+    `${API_URL}/${tweetId}/edit`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      }
+    }
+  );
+
+  return res.data;
+}

@@ -152,7 +152,7 @@ export class TweetService {
 
   async findAllForCurrentUser(
     userId: number,
-    limit = 5,
+    limit: number = 5,
     cursor?: string,
   ): Promise<PaginatedTweet> {
     const cursorId = cursor ? parseInt(cursor, 10) : undefined;
@@ -229,12 +229,17 @@ export class TweetService {
     });
   }
 
-  async remove(id: number) {
-    return this.databaseService.tweet.delete({
-      where: {
-        id: id,
-      },
-    });
+  async remove(id: number): Promise<{ deleted: boolean }> {
+    try {
+      await this.databaseService.tweet.delete({
+        where: {
+          id: id,
+        },
+      });
+      return { deleted: true };
+    } catch {
+      return { deleted: false };
+    }
   }
 
   async likeTweet(
@@ -367,19 +372,15 @@ export class TweetService {
     images: string[] = [],
   ): Promise<{ retweeted: boolean; tweet?: Tweet }> {
     return this.databaseService.$transaction(async (prisma) => {
-      // Fetch the tweet to retweet
       const tweet = await prisma.tweet.findUnique({
         where: { id: tweetId },
         select: { id: true, retweetOfId: true, retweetCount: true },
       });
 
-      console.log('tweet for retweeting: ', tweet);
-
       if (!tweet) throw new Error('Tweet not found');
 
       const originalTweetId = tweet.retweetOfId ?? tweet.id;
 
-      // Check if the user has already retweeted this tweet
       const existing = await prisma.tweet.findFirst({
         where: {
           authorId: userId,
@@ -387,15 +388,11 @@ export class TweetService {
         },
       });
 
-      console.log('existing retweet: ', existing);
-
       if (existing) {
-        // Undo the retweet by deleting the existing retweet and decrementing the retweetCount
         await this.databaseService.tweet.delete({
           where: { id: existing.id },
         });
 
-        // Safely decrement retweetCount, ensuring it doesn't go below zero
         const respond = await prisma.tweet.update({
           where: { id: originalTweetId },
           data: {
@@ -405,14 +402,10 @@ export class TweetService {
           },
         });
 
-        console.log('descrement: ', respond);
         return { retweeted: false, tweet: respond };
       }
 
-      // Create a new retweet
-
-      // Increment the retweetCount on the original tweet
-      const updated = await prisma.tweet.update({
+      await prisma.tweet.update({
         where: { id: originalTweetId },
         data: {
           retweetCount: {
@@ -452,14 +445,39 @@ export class TweetService {
           likedBy: true,
         },
       });
-      console.log('new retweet created: ', newRetweet);
-
-      console.log('updated retweet count: ', updated);
 
       return {
         retweeted: true,
         tweet: newRetweet,
       };
+    });
+  }
+
+  async edit(
+    tweetId: number,
+    description?: string,
+    imageUrls: string[] = [],
+  ): Promise<{ updated: boolean; tweet: Tweet | null }> {
+    return this.databaseService.$transaction(async (prisma) => {
+      const foundTweet = await prisma.tweet.findFirst({
+        where: {
+          id: tweetId,
+        },
+      });
+
+      if (!foundTweet) return { updated: false, tweet: null };
+
+      const updatedTweet = await prisma.tweet.update({
+        where: {
+          id: tweetId,
+        },
+        data: {
+          description: description,
+          images: imageUrls,
+        },
+      });
+
+      return { updated: true, tweet: updatedTweet };
     });
   }
 }
