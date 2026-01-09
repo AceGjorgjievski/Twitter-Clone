@@ -1,8 +1,8 @@
 import { Prisma, Tweet } from '.prisma/client';
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from 'database/database.service';
-import { CreateTweetDto } from 'models/create-tweet.dto';
-import { PaginatedTweet } from 'models/paginated-tweet.dto';
+import { CreateTweetDto } from 'models/dtos/create-tweet.dto';
+import { PaginatedTweet } from 'models/dtos/paginated-tweet.dto';
 
 @Injectable()
 export class TweetService {

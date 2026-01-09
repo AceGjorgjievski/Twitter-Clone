@@ -16,43 +16,140 @@ import { useRouter } from "@/routes/hooks";
 
 import { paths } from "@/routes/paths";
 import { useAuthContext } from "@/auth/hooks";
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { UserRegistrationSchema, UserRegistrationZodDto } from "@/schemas";
 import { useState } from "react";
-import { validateUsername, validateEmail, validatePassword, validatePasswordRepeat } from "@/utils/validators";
 
 export default function RegisterView() {
-  const [username, setUsername] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [passwordRepeat, setPasswordRepeat] = useState<string>("");
-  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const [errorZod, setErrorZod] = useState<string>("");
 
-  const { register } = useAuthContext();
+  const { register: registerUser } = useAuthContext();
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<UserRegistrationZodDto>({
+    resolver: zodResolver(UserRegistrationSchema),
+  });
 
-      const usernameError = validateUsername(username);
-    if (usernameError) return setError(usernameError);
-
-    const emailError = validateEmail(email);
-    if (emailError) return setError(emailError);
-
-    const passwordError = validatePassword(password);
-    if (passwordError) return setError(passwordError);
-
-    const repeatError = validatePasswordRepeat(password, passwordRepeat);
-    if (repeatError) return setError(repeatError);
-
+  const onSubmit = async (data: UserRegistrationZodDto) => {
+    setErrorZod("");
     try {
-      
-      await register(username, email, password);
-
+      await registerUser(
+        data.username,
+        data.email,
+        data.password,
+        data.passwordRepeat
+      );
       router.replace(paths.home());
-    } catch (err) {
-      setError("Login Error: " + err);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      setErrorZod(err.message);
     }
   };
+
+  const renderHeader = (
+    <>
+      <Toolbar
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Image
+          src="/images/twitter-logo.png"
+          alt="Logo"
+          width={100}
+          height={100}
+          onClick={() => router.push(paths.home())}
+          style={{
+            cursor: "pointer",
+            transition: "all 0.7s ease",
+            textShadow: "inherit",
+          }}
+        />
+      </Toolbar>
+      <Typography variant="h5" align="center" gutterBottom sx={{ mb: 3 }}>
+        Register
+      </Typography>
+    </>
+  );
+
+  const renderForm = (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <FormControl fullWidth sx={{ gap: 3 }}>
+        <TextField
+          label="Username"
+          {...register("username")}
+          error={!!errors.username}
+          helperText={errors.username?.message}
+        />
+
+        <TextField
+          label="Email"
+          {...register("email")}
+          error={!!errors.email}
+          helperText={errors.email?.message}
+        />
+
+        <TextField
+          label="Password"
+          type="password"
+          {...register("password")}
+          error={!!errors.password}
+          helperText={errors.password?.message}
+        />
+
+        <TextField
+          label="Password Repeat"
+          type="password"
+          {...register("passwordRepeat")}
+          error={!!errors.passwordRepeat}
+          helperText={errors.passwordRepeat?.message}
+        />
+
+        <Button variant="contained" type="submit">
+          Register
+        </Button>
+        {errorZod && (
+          <Typography
+            color="error"
+            variant="body2"
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            {errorZod}
+          </Typography>
+        )}
+      </FormControl>
+    </form>
+  );
+
+  const renderFooter = (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        my: 2,
+        color: "#536471",
+        fontSize: "0.85rem",
+      }}
+    >
+      <Typography>Already have an account? &nbsp;</Typography>
+      <Link href={paths.login()}>
+        <Typography>Login now!</Typography>
+      </Link>
+    </Box>
+  );
 
   return (
     <Box
@@ -75,111 +172,15 @@ export default function RegisterView() {
           backgroundColor: "rgba(255, 255, 255, 0.9)",
           boxShadow: 6,
           borderRadius: 3,
-          height: 700,
+          maxHeight: 750,
         }}
       >
         <CardContent>
-          <Typography
-            variant="h5"
-            align="center"
-            gutterBottom
-            sx={{ mt: 5, mb: 8 }}
-          >
-            Register
-          </Typography>
+          {renderHeader}
 
-          <form onSubmit={onSubmit}>
-            <FormControl fullWidth sx={{ gap: 3 }}>
-              <TextField
-                required
-                label="Username"
-                name="username"
-                autoComplete="username"
-                onChange={(e) => setUsername(e.target.value)}
-              />
+          {renderForm}
 
-              <TextField
-                required
-                label="Email"
-                name="email"
-                autoComplete="email"
-                onChange={(e) => setEmail(e.target.value)}
-              />
-
-              <TextField
-                required
-                label="Password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                onChange={(e) => setPassword(e.target.value)}
-              />
-
-              <TextField
-                required
-                label="Password Repeat"
-                name="password-repeat"
-                type="password"
-                autoComplete="current-password"
-                onChange={(e) => setPasswordRepeat(e.target.value)}
-              />
-
-            {error && (
-                <Typography
-                sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                }}
-                color="error"
-                variant="body2"
-                >
-                {error}
-                </Typography>
-            )}
-
-              <Button variant="contained" type="submit" sx={{ mt: 5 }}>
-                Register
-              </Button>
-            </FormControl>
-          </form>
-
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              my: 2,
-              color: "#536471",
-              fontSize: "0.85rem",
-            }}
-          >
-            <Typography>Already have an account? &nbsp;</Typography>
-            <Link href={paths.login()}>
-              <Typography>Login now!</Typography>
-            </Link>
-          </Box>
-
-          <Toolbar
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Image
-              src="/images/twitter-logo.png"
-              alt="Logo"
-              width={150}
-              height={150}
-              onClick={() => router.push(paths.home())}
-              style={{
-                cursor: "pointer",
-                transition: "all 0.7s ease",
-                textShadow: "inherit",
-              }}
-            />
-          </Toolbar>
+          {renderFooter}
         </CardContent>
       </Card>
     </Box>

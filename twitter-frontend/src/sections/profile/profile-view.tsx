@@ -1,6 +1,6 @@
+import { TweetItem } from "@/shared/components";
 import { Tweet, User } from "@/types";
 import { Card, CardHeader, Stack, Box, Divider, Grid } from "@mui/material";
-import TweetItem from "../../shared/components/tweet-item";
 
 type Props = {
   user: User;

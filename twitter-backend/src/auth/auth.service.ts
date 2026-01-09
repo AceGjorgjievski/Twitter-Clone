@@ -1,8 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { UserLoginDto } from 'models/user-login.dto';
-import { UserRegisterDto } from 'models/user-register.dto';
+import { UserLoginDto } from 'models/dtos/user-login.dto';
+import { UserRegisterDto } from 'models/dtos/user-register.dto';
 import { DatabaseService } from 'database/database.service';
 import { User } from '@prisma/client';
 
@@ -16,6 +16,25 @@ export class AuthService {
   async register(
     body: UserRegisterDto,
   ): Promise<Omit<User, 'password'> & { accessToken: string }> {
+    const existingUser = await this.databaseService.user.findFirst({
+      where: {
+        OR: [{ email: body.email }, { name: body.username }],
+      },
+    });
+
+    if (existingUser) {
+      if (existingUser.email === body.email) {
+        throw new ConflictException({
+          message: 'Email is already registered',
+        });
+      }
+
+      if (existingUser.name === body.username) {
+        throw new ConflictException({
+          message: 'Username is already taken',
+        });
+      }
+    }
     const hashedPassword = await bcrypt.hash(body.password, 10);
 
     const user = await this.databaseService.user.create({
@@ -48,12 +67,16 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new ConflictException({
+        message: 'User does not exist (register now) !',
+      });
     }
 
     const valid = await bcrypt.compare(body.password, user.password);
     if (!valid) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new ConflictException({
+        message: 'Incorrect password',
+      });
     }
 
     const token = this.jwtService.sign({ sub: user.id, email: user.email });

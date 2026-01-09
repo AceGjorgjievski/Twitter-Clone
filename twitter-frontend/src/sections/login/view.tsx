@@ -17,33 +17,120 @@ import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "@/routes/hooks";
 import { useAuthContext } from "@/auth/hooks";
-import { validateEmail, validatePassword } from "@/utils/validators";
+import { UserLoginSchema, UserLoginZodDto } from "@/schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
 export default function LoginView() {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [error, setError] = useState<string | null>(null);
+  const [errorZod, setErrorZod] = useState<string>("");
+
   const router = useRouter();
 
-  const { login } = useAuthContext();
+  const { login: loginUser } = useAuthContext();
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<UserLoginZodDto>({
+    resolver: zodResolver(UserLoginSchema),
+  });
 
-    const emailError = validateEmail(email);
-    if(emailError) return setError(emailError);
-
-    const passwordError = validatePassword(password);
-    if(passwordError) return setError(passwordError);
+  const onSubmit = async (data: UserLoginZodDto) => {
+    setErrorZod("");
 
     try {
-      await login(email, password);
-      router.replace(paths.home())
-    } catch (err) {
-      setError("Login Error: " + err);
+      await loginUser(data.email, data.password);
+      router.replace(paths.home());
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      setErrorZod(err.message);
     }
-
   };
+
+  const renderHeader = (
+    <>
+      <Toolbar
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Image
+          src="/images/twitter-logo.png"
+          alt="Logo"
+          width={100}
+          height={100}
+          onClick={() => router.push(paths.home())}
+          style={{
+            cursor: "pointer",
+            transition: "all 0.7s ease",
+            textShadow: "inherit",
+          }}
+        />
+      </Toolbar>
+      <Typography variant="h5" align="center" gutterBottom sx={{ mb: 3 }}>
+        Login
+      </Typography>
+    </>
+  );
+
+  const renderForm = (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <FormControl fullWidth sx={{ gap: 3 }}>
+        <TextField
+          label="Email"
+          {...register("email")}
+          error={!!errors.email}
+          helperText={errors.email?.message}
+        />
+
+        <TextField
+          label="Password"
+          type="password"
+          {...register("password")}
+          error={!!errors.password}
+          helperText={errors.password?.message}
+        />
+
+        <Button variant="contained" type="submit">
+          Log in
+        </Button>
+        {errorZod && (
+          <Typography
+            color="error"
+            variant="body2"
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            {errorZod}
+          </Typography>
+        )}
+      </FormControl>
+    </form>
+  );
+
+  const renderFooter = (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        my: 2,
+        color: "#536471",
+        fontSize: "0.85rem",
+      }}
+    >
+      <Typography>Don&apos;t have an account? &nbsp;</Typography>
+      <Link href={paths.register()}>
+        <Typography>Register now!</Typography>
+      </Link>
+    </Box>
+  );
 
   return (
     <Box
@@ -66,94 +153,15 @@ export default function LoginView() {
           backgroundColor: "rgba(255, 255, 255, 0.9)",
           boxShadow: 6,
           borderRadius: 3,
-          height: 600,
+          maxHeight: 750,
         }}
       >
         <CardContent>
-          <Typography
-            variant="h5"
-            align="center"
-            gutterBottom
-            sx={{ mt: 5, mb: 8 }}
-          >
-            Login
-          </Typography>
+          {renderHeader}
 
-          <form onSubmit={onSubmit}>
-            <FormControl fullWidth sx={{ gap: 3 }}>
-              <TextField
-                required
-                label="Email"
-                name="email"
-                autoComplete="email"
-                onChange={(e) => setEmail(e.target.value)}
-              />
+          {renderForm}
 
-              <TextField
-                required
-                label="Password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                onChange={(e) => setPassword(e.target.value)}
-              />
-
-              {error && (
-                <Typography
-                  sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                  color="error"
-                  variant="body2"
-                >
-                  {error}
-                </Typography>
-              )}
-
-              <Button variant="contained" type="submit" sx={{ mt: 5 }}>
-                Log in
-              </Button>
-            </FormControl>
-          </form>
-
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              my: 2,
-              color: "#536471",
-              fontSize: "0.85rem",
-            }}
-          >
-            <Typography>Don&apos;t have an account? &nbsp;</Typography>
-            <Link href={paths.register()}>
-              <Typography>Register now!</Typography>
-            </Link>
-          </Box>
-
-          <Toolbar
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Image
-              src="/images/twitter-logo.png"
-              alt="Logo"
-              width={150}
-              height={150}
-              onClick={() => router.push(paths.home())}
-              style={{
-                cursor: "pointer",
-                transition: "all 0.7s ease",
-                textShadow: "inherit",
-              }}
-            />
-          </Toolbar>
+          {renderFooter}
         </CardContent>
       </Card>
     </Box>

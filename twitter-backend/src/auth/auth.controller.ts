@@ -1,22 +1,34 @@
-import { Body, Controller, Post, UseGuards, Get } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  UseGuards,
+  Get,
+  UsePipes,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
-import { UserLoginDto } from 'models/user-login.dto';
-import { UserRegisterDto } from 'models/user-register.dto';
+import { UserLoginDto } from 'models/dtos/user-login.dto';
+import { UserRegisterDto } from 'models/dtos/user-register.dto';
 import { CurrentUserDecorator } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
+import { ZodValidationPipe } from 'models/pipes/zod-validation.pipe';
+import { UserRegistrationSchema } from 'models/dtos/zod/user-register-zod.dto';
+import { UserLoginSchema } from 'models/dtos/zod/user-login-zod.dto';
 
 @Controller('api/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
+  @UsePipes(new ZodValidationPipe(UserRegistrationSchema))
   @Post('register')
   register(@Body() body: UserRegisterDto) {
     return this.authService.register(body);
   }
 
   @Public()
+  @UsePipes(new ZodValidationPipe(UserLoginSchema))
   @Post('login')
   login(@Body() body: UserLoginDto) {
     return this.authService.login(body);

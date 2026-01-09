@@ -11,7 +11,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { TweetService } from './tweet.service';
-import { CreateTweetDto } from 'models/create-tweet.dto';
+import { CreateTweetDto } from 'models/dtos/create-tweet.dto';
 import { CurrentUserDecorator } from 'auth/decorators/current-user.decorator';
 import { Tweet } from '.prisma/client';
 import { FilesInterceptor } from '@nestjs/platform-express';
@@ -19,7 +19,7 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { Express } from 'express';
 import { Public } from 'auth/decorators/public.decorator';
-import { PaginatedTweet } from 'models/paginated-tweet.dto';
+import { PaginatedTweet } from 'models/dtos/paginated-tweet.dto';
 
 @Controller('api/tweet')
 export class TweetController {
