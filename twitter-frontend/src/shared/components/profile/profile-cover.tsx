@@ -2,15 +2,14 @@ import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Avatar from "@mui/material/Avatar";
 import ListItemText from "@mui/material/ListItemText";
-import { colors } from "@mui/material";
 
 type Props = {
   name: string;
   profilePicture: string;
-  role: string;
+  slug: string;
 };
 
-export default function ProfileCover({ name, profilePicture, role }: Props) {
+export default function ProfileCover({ name, profilePicture, slug }: Props) {
   return (
     <Box
       sx={{
@@ -28,7 +27,7 @@ export default function ProfileCover({ name, profilePicture, role }: Props) {
             width: { xs: 64, md: 80 },
             height: { xs: 64, md: 80 },
             border: `solid 2px white`,
-            color: colors.red[400],
+            color: "#ffffff",
           }}
         >
           {name?.charAt(0).toUpperCase()}
@@ -39,10 +38,10 @@ export default function ProfileCover({ name, profilePicture, role }: Props) {
             mt: 3,
             ml: { md: 3 },
             textAlign: { xs: "center", md: "unset" },
-            color: colors.red[400],
+            color: "#ffffff",
           }}
           primary={name}
-          secondary={role.toUpperCase()}
+          secondary={`@${slug}`}
           primaryTypographyProps={{
             typography: "h4",
           }}

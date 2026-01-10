@@ -1,25 +1,35 @@
 "use client";
 
-import { useAuthContext } from "@/auth/hooks";
-
-import { useEffect, useRef, useState } from "react";
-import { PROFILE_TABS, User } from "@/types";
-import { loadTweetsForCurrentUser } from "@/services";
 import { useInfiniteTweets } from "@/hooks";
+import { loadTweetsForUser } from "@/services";
+import { OTHER_USER_TABS, PaginatedTweet, User } from "@/types";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import {
-  FollowersView,
-  FollowingView,
-  LikedTweetsView,
-  ProfileHeaderView,
-  ProfileSubView,
-} from "@/shared/components/profile";
+import ProfileHeaderView from "@/shared/components/profile/profile-header-view";
+import ProfileSubView from "@/shared/components/profile/profile-sub-view";
+import FollowersView from "@/shared/components/profile/followers-view";
+import FollowingView from "@/shared/components/profile/following-view";
 
-export default function ProfileView() {
-  const { user } = useAuthContext();
+type Props = {
+  name: string;
+};
 
-  const loaderRef = useRef<HTMLDivElement>(null);
+export default function UserProfileView({ name }: Props) {
+  const [user, setUser] = useState<User>();
   const [currentTab, setCurrentTab] = useState("profile");
+  const loaderRef = useRef<HTMLDivElement>(null);
+
+  const fetchUserTweets = useMemo(
+    () =>
+      async (limit: number, cursor?: string): Promise<PaginatedTweet> => {
+        const res = await loadTweetsForUser(name, limit, cursor);
+
+        setUser((prev) => prev ?? res.user);
+
+        return res.tweets;
+      },
+    [name]
+  );
 
   const {
     data,
@@ -29,13 +39,9 @@ export default function ProfileView() {
     isFetchingNextPage,
     isFetching,
     isLoading,
-  } = useInfiniteTweets(
-    ["profile-tweets", user?.id],
-    loadTweetsForCurrentUser,
-    5
-  );
+  } = useInfiniteTweets(["user-profile-tweets", name], fetchUserTweets, 5);
 
-  const userTweets = data?.pages.flatMap((page) => page.tweets) || [];
+  const tweets = data?.pages.flatMap((page) => page.tweets) ?? [];
 
   useEffect(() => {
     if (!loaderRef.current || !hasNextPage) return;
@@ -73,20 +79,19 @@ export default function ProfileView() {
         user={user as User}
         currentTab={currentTab}
         onChangeTab={setCurrentTab}
-        tabs={PROFILE_TABS}
+        tabs={OTHER_USER_TABS}
       />
 
       {currentTab === "profile" && (
         <>
           <ProfileSubView
             user={user as User}
-            tweets={userTweets}
+            tweets={tweets}
             isFetchingNextPage={isFetchingNextPage}
           />
           <div ref={loaderRef} style={{ height: 40 }} />
         </>
       )}
-      {currentTab === "liked-tweets" && <LikedTweetsView user={user as User} />}
       {currentTab === "followers" && <FollowersView />}
       {currentTab === "following" && <FollowingView />}
     </>

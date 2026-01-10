@@ -5,9 +5,14 @@ import { Card, CardHeader, Stack, Box, Divider, Grid } from "@mui/material";
 type Props = {
   user: User;
   tweets: Tweet[];
+  isFetchingNextPage?: boolean;
 };
 
-export default function ProfileSubView({ user, tweets }: Props) {
+export default function ProfileSubView({
+  user,
+  tweets,
+  isFetchingNextPage,
+}: Props) {
   const renderFollows = (
     <Card
       sx={{
@@ -121,7 +126,11 @@ export default function ProfileSubView({ user, tweets }: Props) {
 
   const renderProfileTweets = (
     <>
-      <CardHeader title="My Tweets" />
+      <CardHeader
+        title={
+          tweets.length > 0 ? "My Tweets" : "You haven't posted anything yet."
+        }
+      />
       {tweets.map((tweet) => (
         <TweetItem key={tweet.id} tweet={tweet} />
       ))}
@@ -146,6 +155,7 @@ export default function ProfileSubView({ user, tweets }: Props) {
 
         <Grid component={"div"} size={{ xs: 12, md: 8 }}>
           <Stack spacing={3}>{renderProfileTweets}</Stack>
+          {isFetchingNextPage && <p>Loading more tweets...</p>}
         </Grid>
       </Grid>
     </>

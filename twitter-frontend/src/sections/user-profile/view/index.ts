@@ -1,0 +1,1 @@
+export { default as UserProfileView } from './overview-user-profile.view';

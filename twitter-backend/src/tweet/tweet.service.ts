@@ -1,4 +1,4 @@
-import { Prisma, Tweet } from '.prisma/client';
+import { Prisma, Tweet, User } from '.prisma/client';
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from 'database/database.service';
 import { CreateTweetDto } from 'models/dtos/create-tweet.dto';
@@ -218,6 +218,14 @@ export class TweetService {
         id,
       },
     });
+  }
+
+  async getAllTweetsForUser(
+    user: Omit<User, 'password'>,
+    limit: number = 5,
+    cursor?: string,
+  ) {
+    return this.findAllForCurrentUser(user.id, limit, cursor);
   }
 
   async update(id: number, updateTweetDto: Prisma.TweetUpdateInput) {

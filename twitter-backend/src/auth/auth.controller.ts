@@ -5,6 +5,7 @@ import {
   UseGuards,
   Get,
   UsePipes,
+  Param,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -15,6 +16,7 @@ import { Public } from './decorators/public.decorator';
 import { ZodValidationPipe } from 'models/pipes/zod-validation.pipe';
 import { UserRegistrationSchema } from 'models/dtos/zod/user-register-zod.dto';
 import { UserLoginSchema } from 'models/dtos/zod/user-login-zod.dto';
+import { User } from '.prisma/client';
 
 @Controller('api/auth')
 export class AuthController {
@@ -39,5 +41,12 @@ export class AuthController {
   getCurrent(@CurrentUserDecorator() user: any) {
     const fullUser = this.authService.findUserByUserId(user.userId);
     return fullUser;
+  }
+
+  @Get(':id/user-profile')
+  getUserProfile(
+    @Param('id') username: string,
+  ): Promise<Omit<User, 'password'>> {
+    return this.authService.getUserProfileInfo(username);
   }
 }

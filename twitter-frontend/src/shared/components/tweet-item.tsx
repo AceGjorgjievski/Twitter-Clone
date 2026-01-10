@@ -1,4 +1,3 @@
-
 import { Box, Typography, Avatar, Stack, Card, Link } from "@mui/material";
 
 import ActionsMenu from "./actions-menu";
@@ -6,13 +5,14 @@ import RetweetModal from "./retweet-modal";
 
 import { TweetImageLayout } from "@/layouts/tweet-image";
 import { ImagePreviewModal, RenderTweetButtons } from "@/shared/components";
-import { Tweet } from "@/types";
+import { Tweet, TweetActionItem } from "@/types";
 
 import { deleteTweet, editTweet } from "@/services";
 import { useTweetQueries } from "@/hooks";
 import { useState } from "react";
 import { useAuthContext } from "@/auth/hooks";
-
+import { paths } from "@/routes/paths";
+import { useRouter } from "@/routes/hooks";
 
 type Props = {
   tweet: Tweet;
@@ -21,8 +21,14 @@ type Props = {
 };
 
 export default function TweetItem({ tweet, disabledButtons = false }: Props) {
+  const router = useRouter();
+
   const [imageModalOpen, setImageModalOpen] = useState<boolean>(false);
   const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
+  const [avatarAnchorEl, setAvatarAnchorEl] = useState<HTMLElement | null>(
+    null
+  );
+
   const { authenticated, user } = useAuthContext();
   const { refreshAllTweetData, refreshTweet } = useTweetQueries(
     Number(user?.id)
@@ -34,6 +40,7 @@ export default function TweetItem({ tweet, disabledButtons = false }: Props) {
 
   const handleClose = () => {
     setEditModalOpen(false);
+    setAvatarAnchorEl(null);
   };
 
   const handleEditSubmit = async (description?: string, images?: File[]) => {
@@ -67,7 +74,24 @@ export default function TweetItem({ tweet, disabledButtons = false }: Props) {
     await refreshAllTweetData();
   };
 
-  const actionItems = [
+const slugify = (name: string) =>
+  name
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "")
+    .replace(/[^a-z0-9-]/g, "");
+
+  const handleProfileClick = () => {
+    if (tweet.author.id === user?.id) router.push(paths.profile());
+    else {
+      const slug = slugify(tweet.author.name);
+      router.push(paths.userProfile(slug));
+    }
+  };
+
+  const handleFollowClick = () => {};
+
+  const tweetActionItems: TweetActionItem[] = [
     {
       label: "Edit",
       onClick: handleEdit,
@@ -75,6 +99,17 @@ export default function TweetItem({ tweet, disabledButtons = false }: Props) {
     {
       label: "Delete",
       onClick: handleDelete,
+    },
+  ];
+
+  const avatarActionItems: TweetActionItem[] = [
+    {
+      label: "Profile",
+      onClick: handleProfileClick,
+    },
+    {
+      label: "Follow",
+      onClick: handleFollowClick,
     },
   ];
 
@@ -125,7 +160,7 @@ export default function TweetItem({ tweet, disabledButtons = false }: Props) {
         </Typography>
 
         {authenticated && tweet.author.id === user?.id && !disabledButtons && (
-          <ActionsMenu options={actionItems} />
+          <ActionsMenu options={tweetActionItems} />
         )}
 
         <RetweetModal
@@ -177,6 +212,9 @@ export default function TweetItem({ tweet, disabledButtons = false }: Props) {
         minHeight: "100px",
         marginBottom: "1rem",
       }}
+      onClick={(e) => {
+        e.stopPropagation();
+      }}
     >
       <Card
         sx={{
@@ -199,8 +237,21 @@ export default function TweetItem({ tweet, disabledButtons = false }: Props) {
               borderRadius: "50%",
               backgroundColor: "#cfd9de",
               flexShrink: 0,
+              cursor: 'pointer'
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setAvatarAnchorEl(e.currentTarget);
             }}
           />
+          {avatarAnchorEl && (
+            <ActionsMenu
+              onClose={handleClose}
+              anchorElProp={avatarAnchorEl}
+              showIcon={false}
+              options={avatarActionItems}
+            />
+          )}
           {renderTweetInfo}
         </Box>
 

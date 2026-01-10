@@ -20,10 +20,15 @@ import { extname } from 'path';
 import { Express } from 'express';
 import { Public } from 'auth/decorators/public.decorator';
 import { PaginatedTweet } from 'models/dtos/paginated-tweet.dto';
+import { AuthService } from 'auth/auth.service';
+import { UserProfileDto } from 'models/dtos/user-profile.dto';
 
 @Controller('api/tweet')
 export class TweetController {
-  constructor(private readonly tweeterService: TweetService) {}
+  constructor(
+    private readonly tweeterService: TweetService,
+    private readonly authService: AuthService,
+  ) {}
 
   @Public()
   @Get()
@@ -63,6 +68,24 @@ export class TweetController {
       Number(limit),
       cursor,
     );
+  }
+
+  @Get(':id/user-profile')
+  async getAllTweetsForUser(
+    @Param('id') username: string,
+    @Query('limit') limit = 5,
+    @Query('cursor') cursor?: string,
+  ): Promise<UserProfileDto> {
+    const user = await this.authService.getUserProfileInfo(username);
+    const tweets = await this.tweeterService.getAllTweetsForUser(
+      user,
+      Number(limit),
+      cursor,
+    );
+    return {
+      user,
+      tweets,
+    };
   }
 
   @Post()

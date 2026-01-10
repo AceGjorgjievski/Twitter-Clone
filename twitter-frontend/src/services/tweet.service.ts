@@ -1,4 +1,4 @@
-import { PaginatedTweet, Tweet } from "@/types";
+import { PaginatedTweet, Tweet, UserProfileDto } from "@/types";
 import { BACKEND_API } from "../../config-global";
 import axiosInstance from "@/utils/axios";
 
@@ -30,6 +30,13 @@ export async function loadTweetsWhenUserLoggedIn(limit = 5, cursor?: string) {
   return res.data;
 }
 
+export async function loadTweetsForUser(username: string, limit = 5, cursor?: string) {
+  const res = await axiosInstance.get<UserProfileDto>(`${API_URL}/${username}/user-profile`, {
+    params: { limit, cursor }
+  })
+
+  return res.data;
+}
 
 export async function loadTweetsForCurrentUser(limit = 5, cursor?: string) {
   const res = await axiosInstance.get<PaginatedTweet>(

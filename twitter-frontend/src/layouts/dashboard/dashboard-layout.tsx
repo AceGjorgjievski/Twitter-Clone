@@ -14,6 +14,9 @@ type Props = {
 export default function DashboardLayoutView({ children }: Props) {
   const pathName = usePathname();
 
+  const isProfilePage =
+    pathName === paths.profile() || pathName.startsWith("/profile/");
+
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <LeftPanel />
@@ -22,7 +25,7 @@ export default function DashboardLayoutView({ children }: Props) {
       <Box component="main" sx={{ flexGrow: 1, p: 2 }}>
         {children}
       </Box>
-      {pathName !== paths.profile() && <RightPanel />}
+      {!isProfilePage && <RightPanel />}
     </Box>
   );
 }
