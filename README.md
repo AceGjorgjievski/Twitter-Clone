@@ -9,8 +9,8 @@
 2. Navigate to the folder via CLI ``cd Twitter-Clone``
 3. Open it with your editor (VSCode users: ``code .``)
 4. Open your database management tool (pgadmin, mysql workbench) and create a database
-5. Navigate to the backend folder and create ``.env`` file as specified in the 
-  ``.env_backend_sample.txt`` file
+5. Navigate to the backend folder and create ``.env`` file as specified in the
+   ``.env_backend_sample.txt`` file
 6. Navigate to the frontend folder and create ``.env`` file as specified in the
    ``.env_frontend_sample.txt`` file
 6. If you have completed the steps above, open terminal and navigate to the frontend root folder ``cd: twitter-frontend``
@@ -57,6 +57,7 @@ Bonus:
 
 #### Preview [video]
 <hr>
+
 [Link to the video](https://www.youtube.com/watch?v=n0eSkkp___M)
 
 
