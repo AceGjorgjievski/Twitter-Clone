@@ -6,9 +6,10 @@ import { TweetModule } from './tweet/tweet.module';
 import { AuthModule } from 'auth/auth.module';
 import { APP_GUARD, Reflector } from '@nestjs/core';
 import { AuthGuardService } from 'auth/guard/auth-guard.service';
+import { UsersModule } from 'users/users.module';
 
 @Module({
-  imports: [DatabaseModule, TweetModule, AuthModule],
+  imports: [DatabaseModule, TweetModule, AuthModule, UsersModule],
   controllers: [AppController],
   providers: [
     AppService,

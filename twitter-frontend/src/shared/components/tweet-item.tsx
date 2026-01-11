@@ -13,6 +13,7 @@ import { useState } from "react";
 import { useAuthContext } from "@/auth/hooks";
 import { paths } from "@/routes/paths";
 import { useRouter } from "@/routes/hooks";
+import { slugify } from "@/utils/helpers";
 
 type Props = {
   tweet: Tweet;
@@ -74,13 +75,6 @@ export default function TweetItem({ tweet, disabledButtons = false }: Props) {
     await refreshAllTweetData();
   };
 
-const slugify = (name: string) =>
-  name
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "")
-    .replace(/[^a-z0-9-]/g, "");
-
   const handleProfileClick = () => {
     if (tweet.author.id === user?.id) router.push(paths.profile());
     else {
@@ -88,8 +82,6 @@ const slugify = (name: string) =>
       router.push(paths.userProfile(slug));
     }
   };
-
-  const handleFollowClick = () => {};
 
   const tweetActionItems: TweetActionItem[] = [
     {
@@ -106,10 +98,6 @@ const slugify = (name: string) =>
     {
       label: "Profile",
       onClick: handleProfileClick,
-    },
-    {
-      label: "Follow",
-      onClick: handleFollowClick,
     },
   ];
 
@@ -237,7 +225,7 @@ const slugify = (name: string) =>
               borderRadius: "50%",
               backgroundColor: "#cfd9de",
               flexShrink: 0,
-              cursor: 'pointer'
+              cursor: "pointer",
             }}
             onClick={(e) => {
               e.stopPropagation();

@@ -18,7 +18,7 @@ import ImageIcon from "@mui/icons-material/Image";
 import ImagePreviewer from "@/sections/home/image-previewer";
 import EmojiEmotionsOutlinedIcon from "@mui/icons-material/EmojiEmotionsOutlined";
 import { EMOJIS } from "@/sections/home/emojis-data";
-import { urlToFile } from "@/utils/helpers/file.helper";
+import { urlToFile } from "@/utils/helpers";
 
 type Props = {
   tweet: Tweet;

@@ -6,14 +6,23 @@ type Props = {
   user: User;
   tweets: Tweet[];
   isFetchingNextPage?: boolean;
+  totalFollowers: number;
+  totalFollowing: number;
+  totalLikedTweets: number;
+  totalRetweetedTweets: number;
 };
 
 export default function ProfileSubView({
   user,
   tweets,
   isFetchingNextPage,
+  totalFollowers,
+  totalFollowing,
+  totalLikedTweets,
+  totalRetweetedTweets,
 }: Props) {
-  const renderFollows = (
+
+  const renderUserStats = (
     <Card
       sx={{
         py: 3,
@@ -34,19 +43,17 @@ export default function ProfileSubView({
         }
       >
         <Stack width={1}>
-          {/* {fNumber(info.totalFollowers)} */}
-          1500
+          {totalFollowers}
           <Box
             component="span"
             sx={{ color: "text.secondary", typography: "body2" }}
           >
-            Follower
+            Followers
           </Box>
         </Stack>
 
         <Stack width={1}>
-          {/* {fNumber(info.totalFollowing)} */}
-          3000
+          {Number(totalFollowing)}
           <Box
             component="span"
             sx={{ color: "text.secondary", typography: "body2" }}
@@ -66,8 +73,7 @@ export default function ProfileSubView({
         }
       >
         <Stack width={1}>
-          {/* {fNumber(info.totalFollowers)} */}
-          1500
+          {Number(totalLikedTweets)}
           <Box
             component="span"
             sx={{ color: "text.secondary", typography: "body2" }}
@@ -77,8 +83,7 @@ export default function ProfileSubView({
         </Stack>
 
         <Stack width={1}>
-          {/* {fNumber(info.totalFollowing)} */}
-          3000
+          {Number(totalRetweetedTweets)}
           <Box
             component="span"
             sx={{ color: "text.secondary", typography: "body2" }}
@@ -100,7 +105,7 @@ export default function ProfileSubView({
       <CardHeader title="About Me" />
       <Stack spacing={2} sx={{ p: 3 }}>
         <Stack direction="row" spacing={2}>
-          <Box sx={{ typography: "body2" }}>{`Name: ${user.name}`}</Box>
+          <Box sx={{ typography: "body2" }}>{`Name: ${user?.name}`}</Box>
         </Stack>
 
         <Stack direction="row" sx={{ typography: "body2" }}>
@@ -114,9 +119,9 @@ export default function ProfileSubView({
         </Stack>
 
         <Stack direction="row" spacing={2}>
-          {user.createdAt && (
+          {user?.createdAt && (
             <Box sx={{ typography: "body2" }}>
-              Joined at: {new Date(user.createdAt).toLocaleDateString()}
+              Joined at: {new Date(user?.createdAt).toLocaleDateString()}
             </Box>
           )}
         </Stack>
@@ -148,7 +153,7 @@ export default function ProfileSubView({
       >
         <Grid component={"div"} size={{ xs: 12, md: 4 }}>
           <Stack spacing={4}>
-            {renderFollows}
+            {renderUserStats}
             {renderAbout}
           </Stack>
         </Grid>

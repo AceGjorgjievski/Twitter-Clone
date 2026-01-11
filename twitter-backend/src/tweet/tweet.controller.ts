@@ -22,12 +22,14 @@ import { Public } from 'auth/decorators/public.decorator';
 import { PaginatedTweet } from 'models/dtos/paginated-tweet.dto';
 import { AuthService } from 'auth/auth.service';
 import { UserProfileDto } from 'models/dtos/user-profile.dto';
+import { UsersService } from 'users/users.service';
 
 @Controller('api/tweet')
 export class TweetController {
   constructor(
     private readonly tweeterService: TweetService,
     private readonly authService: AuthService,
+    private readonly userService: UsersService,
   ) {}
 
   @Public()
@@ -73,18 +75,59 @@ export class TweetController {
   @Get(':id/user-profile')
   async getAllTweetsForUser(
     @Param('id') username: string,
+    @CurrentUserDecorator() currentUser: any,
     @Query('limit') limit = 5,
     @Query('cursor') cursor?: string,
   ): Promise<UserProfileDto> {
     const user = await this.authService.getUserProfileInfo(username);
     const tweets = await this.tweeterService.getAllTweetsForUser(
-      user,
+      user?.id,
       Number(limit),
       cursor,
     );
+
+    const totalLikedTweets = await this.tweeterService.findLikedByUser(
+      user.id,
+      Number(limit),
+      cursor,
+    );
+
+    const totalRetweetedTweets = await this.tweeterService.findRetweetsByUser(
+      user.id,
+      Number(limit),
+      cursor,
+    );
+
+    let isFollowing = false;
+    let totalFollowers = null;
+    let totalFollowing = null;
+
+    if (user) {
+      const follows = await this.userService.isFollowing(
+        Number(currentUser.id),
+        Number(user.id),
+      );
+
+      isFollowing = follows.isFollowing;
+      const followers = await this.userService.findAllFollowersUsers(
+        Number(user.id),
+      );
+      const following = await this.userService.findAllFollowingsUsers(
+        Number(user.id),
+      );
+
+      totalFollowers = followers;
+      totalFollowing = following;
+    }
+
     return {
       user,
       tweets,
+      isFollowing,
+      totalFollowers,
+      totalFollowing,
+      totalLikedTweets,
+      totalRetweetedTweets,
     };
   }
 
@@ -133,11 +176,7 @@ export class TweetController {
     @Query('limit') limit = 5,
     @Query('cursor') cursor?: string,
   ): Promise<PaginatedTweet> {
-    return this.tweeterService.findLikedByUser({
-      userId: user.id,
-      limit: Number(limit),
-      cursor,
-    });
+    return this.tweeterService.findLikedByUser(user.id, Number(limit), cursor);
   }
 
   @Public()

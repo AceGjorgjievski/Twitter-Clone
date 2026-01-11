@@ -1,4 +1,4 @@
-import { Prisma, Tweet, User } from '.prisma/client';
+import { Prisma, Tweet } from '.prisma/client';
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from 'database/database.service';
 import { CreateTweetDto } from 'models/dtos/create-tweet.dto';
@@ -221,11 +221,11 @@ export class TweetService {
   }
 
   async getAllTweetsForUser(
-    user: Omit<User, 'password'>,
+    userId: number,
     limit: number = 5,
     cursor?: string,
   ) {
-    return this.findAllForCurrentUser(user.id, limit, cursor);
+    return this.findAllForCurrentUser(userId, limit, cursor);
   }
 
   async update(id: number, updateTweetDto: Prisma.TweetUpdateInput) {
@@ -296,15 +296,11 @@ export class TweetService {
     });
   }
 
-  async findLikedByUser({
-    userId,
-    limit,
-    cursor,
-  }: {
-    userId: number;
-    limit: number;
-    cursor?: string;
-  }): Promise<PaginatedTweet> {
+  async findLikedByUser(
+    userId: number,
+    limit: number,
+    cursor: string,
+  ): Promise<PaginatedTweet> {
     const cursorId = cursor ? Number(cursor) : undefined;
 
     const tweets = await this.databaseService.tweet.findMany({
@@ -329,6 +325,86 @@ export class TweetService {
     }
 
     return { tweets, nextCursor };
+  }
+
+  async findRetweetsByUser(
+    userId: number,
+    limit: number = 5,
+    cursor?: string,
+  ): Promise<PaginatedTweet> {
+    const cursorId = cursor ? Number(cursor) : undefined;
+
+    const retweets = await this.databaseService.tweet.findMany({
+      take: limit + 1,
+      where: {
+        authorId: userId,
+        retweetOfId: { not: null }, // Only retweets
+        ...(cursorId && { id: { lt: cursorId } }),
+      },
+      orderBy: { id: 'desc' },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            profilePicture: true,
+            createdAt: true,
+          },
+        },
+        retweetOf: {
+          include: {
+            author: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                profilePicture: true,
+              },
+            },
+            _count: {
+              select: { retweets: true },
+            },
+          },
+        },
+        likedBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        _count: {
+          select: { retweets: true },
+        },
+      },
+    });
+
+    let nextCursor: string | null = null;
+
+    if (retweets.length > limit) {
+      const nextTweet = retweets[limit - 1];
+      nextCursor = nextTweet.id.toString();
+      retweets.splice(limit);
+    }
+
+    // Normalize retweets, similar to findAllPaginated
+    const normalizedRetweets = retweets.map(
+      ({ _count, retweetOf, ...tweet }) => ({
+        ...tweet,
+        retweetCount: _count.retweets,
+        retweetOf: retweetOf
+          ? {
+              ...retweetOf,
+              retweetCount: retweetOf._count.retweets,
+            }
+          : null,
+        isRetweeted: true, // All are retweets by definition
+      }),
+    );
+
+    return { tweets: normalizedRetweets, nextCursor };
   }
 
   async findById(tweetId: number): Promise<Tweet> {

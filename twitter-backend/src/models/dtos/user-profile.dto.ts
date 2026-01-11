@@ -1,3 +1,4 @@
+import { User } from '.prisma/client';
 import { PaginatedTweet } from 'models/dtos/paginated-tweet.dto';
 
 export type UserProfileDto = {
@@ -11,4 +12,9 @@ export type UserProfileDto = {
     role: string;
   };
   tweets: PaginatedTweet;
+  isFollowing: boolean;
+  totalFollowers: Omit<User, 'password'>[];
+  totalFollowing: Omit<User, 'password'>[];
+  totalLikedTweets: PaginatedTweet;
+  totalRetweetedTweets: PaginatedTweet;
 };

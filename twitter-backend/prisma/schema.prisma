@@ -25,7 +25,24 @@ model User {
 
   tweets      Tweet[] @relation("AuthorTweet")
   likedTweets Tweet[] @relation("LikedTweets")
+
+  following UserFollow[] @relation("Following")
+  followers UserFollow[] @relation("Followers")
+
+  @@map("users")
 }
+
+model UserFollow {
+  followerId Int
+  followingId Int
+
+  follower  User @relation("Following", fields: [followerId], references: [id])
+  following User @relation("Followers", fields: [followingId], references: [id])
+
+  @@id([followerId, followingId])
+  @@map("user_follows")
+}
+
 
 model Tweet {
   id          Int      @id @default(autoincrement())

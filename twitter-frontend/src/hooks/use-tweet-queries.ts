@@ -1,6 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
 
-
 export function useTweetQueries(userId: number) {
   const queryClient = useQueryClient();
 
@@ -13,7 +12,11 @@ export function useTweetQueries(userId: number) {
     if (!userId) return;
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: ["profile-tweets", userId] }),
-      queryClient.invalidateQueries({ queryKey: ["profile-liked-tweets", userId] }),
+      queryClient.invalidateQueries({
+        queryKey: ["profile-liked-tweets", userId],
+      }),
+      queryClient.invalidateQueries({queryKey: ["user-profile-tweets"]}),
+      queryClient.invalidateQueries({ queryKey: ["profile-info", userId] })
     ]);
   };
 
@@ -21,7 +24,7 @@ export function useTweetQueries(userId: number) {
     await Promise.all([refreshTweetFeeds(), refreshUserQueries()]);
   };
 
-    const refreshTweet = async (tweetId: number) => {
+  const refreshTweet = async (tweetId: number) => {
     await queryClient.invalidateQueries({ queryKey: ["tweet", tweetId] });
     await queryClient.refetchQueries({ queryKey: ["tweet", tweetId] });
   };
