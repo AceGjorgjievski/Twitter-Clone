@@ -94,7 +94,7 @@ export default function UserProfileView({ name }: Props) {
           alignContent: "center",
         }}
       >
-        <Typography>Loading more tweets...</Typography>
+        <Typography>Loading...</Typography>
       </Box>
     );
   }

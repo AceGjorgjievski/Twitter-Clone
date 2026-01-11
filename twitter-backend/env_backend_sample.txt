@@ -1,7 +1,11 @@
-create .env file in the root directory in backend and past this:
+
+(for postgresql users - example)
 
 **note: replace [postgres_password] with your pgadmin password and
 postgres_db_name with your newly created database
+
+create .env file in the root directory in backend and past this:
+
 
 DATABASE_URL='postgresql://postgres:[postgres_password]@localhost:5432/[postgres_db_name]?schema=public'
 JWT_SECRET=my-super-secret-key

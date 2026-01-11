@@ -81,7 +81,7 @@ export default function ProfileView() {
           alignContent: "center",
         }}
       >
-        <Typography>Loading more tweets...</Typography>
+        <Typography>Loading...</Typography>
       </Box>
     );
   }

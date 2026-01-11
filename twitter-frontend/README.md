@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+### Full stack Twitter clone web app
+<hr>
 
-First, run the development server:
+#### Installation - CLI
+<hr>
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. Clone this repository: ``git clone https://github.com/AceGjorgjievski/Twitter-Clone.git``
+2. Navigate to the folder via CLI ``cd Twitter-Clone``
+3. Open it with your editor (VSCode users: ``code .``)
+4. Open your database management tool (pgadmin, mysql workbench) and create a database
+5. Navigate to the backend folder and create ``.env`` file as specified in the 
+  ``.env_backend_sample.txt`` file
+6. Navigate to the frontend folder and create ``.env`` file as specified in the
+   ``.env_frontend_sample.txt`` file
+6. If you have completed the steps above, open terminal and navigate to the frontend root folder ``cd: twitter-frontend``
+7. Write: ``npm install``
+8. Now navigate to the backend root folder ``cd: twitter-backend``
+9. Write: ``npm install``
+10. Now again write: ``npx prisma migrate dev`` & after this line write: ``npx prisma generate``
+11. If everything is installed properly (frontend & backend), run the apps [frontend: ``npm run dev`` & backend: ``npm run start:dev``]
+12. In your browser, open [localhost:3000](http://localhost:3000) and test the app.
+13. Register 2 or 3 users & test the app.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+***Note:***
+1. In new terminal you can see the database by running ``npx prisma studio`` and navigate to [locahost:5555](http://localhost:5555)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Learn More
+#### Technologies & Architecture
+<hr>
+- Frontend framework: **Next.js + MUI**
+- Backend framework: **Nest.js**
+- Authentication: **JWTs**
+- ORM: **Prisma**
+- Database: **PostgreSQL**
 
-To learn more about Next.js, take a look at the following resources:
+**Frontend:** Minimal & Modular architecture
+**Backend:** Layerd architecture
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+#### Functionalities implemented
+- User registration and login
+- Creating a post (tweet)
+- Feed displaying posts
+- Like functionality
+- Retweet functionality
+- User profile page
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Bonus:
+- Display of own and other user’s posts
+- Edit tweet
+- Delete tweet
+- Clicking on tweet (details page tweet)
+- Infinite scroll
+- Image upload
 
-## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+#### Preview [video]
+<hr>
+[Link to the video](https://www.youtube.com/watch?v=n0eSkkp___M)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+
