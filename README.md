@@ -29,13 +29,14 @@
 
 #### Technologies & Architecture
 <hr>
+
 - Frontend framework: **Next.js + MUI**
 - Backend framework: **Nest.js**
 - Authentication: **JWTs**
 - ORM: **Prisma**
 - Database: **PostgreSQL**
 
-**Frontend:** Minimal & Modular architecture
+**Frontend:** Minimal & Modular architecture <br>
 **Backend:** Layerd architecture
 
 #### Functionalities implemented
