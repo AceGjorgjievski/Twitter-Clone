@@ -2,7 +2,6 @@ import { Box, colors, Tooltip } from "@mui/material";
 
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
-import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 
 import { useAuthContext } from "@/auth/hooks";
@@ -71,8 +70,6 @@ export default function RenderTweetButtons({
     }
   };
 
-  const handleComment = () => {};
-
   const handleRetweetSubmit = async (description?: string, images?: File[]) => {
     try {
       const formData = new FormData();
@@ -131,14 +128,6 @@ export default function RenderTweetButtons({
       hoverColor: colors.pink[800],
       totalCount: totalLikes,
       onClick: handleLike,
-      disabled: disabledButtons,
-    },
-    {
-      key: "comment",
-      icon: <ChatBubbleOutlineIcon />,
-      hoverColor: colors.cyan[500],
-      totalCount: tweet.comments?.length,
-      onClick: handleComment,
       disabled: disabledButtons,
     },
     {

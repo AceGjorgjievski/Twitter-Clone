@@ -15,6 +15,7 @@ import {
   ProfileSubView,
 } from "@/shared/components/profile";
 import { slugify } from "@/utils/helpers";
+import { Box, Typography } from "@mui/material";
 
 export default function ProfileView() {
   const { user } = useAuthContext();
@@ -72,7 +73,17 @@ export default function ProfileView() {
   }, [hasNextPage, isFetching, isFetchingNextPage, fetchNextPage]);
 
   if (isLoading) {
-    return <p>Loading initial tweets...</p>;
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignContent: "center",
+        }}
+      >
+        <Typography>Loading more tweets...</Typography>
+      </Box>
+    );
   }
 
   if (status === "error") {

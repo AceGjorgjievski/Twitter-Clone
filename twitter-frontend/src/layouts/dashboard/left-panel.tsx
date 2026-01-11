@@ -44,7 +44,7 @@ export default function LeftPanel() {
         {drawerItems
           .filter((item) => {
             if (!authenticated)
-              return item.label === "Home" || item.label === "Profile";
+              return item.label === "Home";
             else return true;
           })
           .map((item: DrawerItem, index) => {
@@ -54,11 +54,7 @@ export default function LeftPanel() {
                 key={index}
                 placement="right"
                 arrow
-                title={
-                  !authenticated && item.label === "Profile"
-                    ? "Login Now!"
-                    : item.label
-                }
+                title={item.label}
               >
                 <ListItem key={item.label} disablePadding>
                   <ListItemButton

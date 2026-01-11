@@ -15,24 +15,9 @@ export const drawerItems: DrawerItem[] = [
         icon: <HomeIcon/>
     },
     {
-        label: "Notifications",
-        path: paths.notifications(),
-        icon: <NotificationsIcon/>
-    },
-    {
-        label: "Messages",
-        path: paths.messages(),
-        icon: <MailIcon/>
-    },
-    {
         label: "Profile",
         path: paths.profile(),
         icon: <PersonIcon/>
     },
-    {
-        label: "More",
-        path: "",
-        icon: <MoreHorizIcon/>
-    }
 ];
 

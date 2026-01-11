@@ -1,5 +1,6 @@
 
 
+
 export default function NotFound() {
-  return <>404 - tweet not found</>;
+  return <>404 - page not found</>;
 }

@@ -1,11 +1,12 @@
 import { loadTweets, loadTweetsWhenUserLoggedIn } from "@/services";
 import { Tweet } from "@/types";
 import { useEffect, useRef } from "react";
-import TweetItem from "../../shared/components/tweet-item";
 import { useInfiniteTweets } from "@/hooks";
 import { useRouter } from "@/routes/hooks";
 import { paths } from "@/routes/paths";
 import { useAuthContext } from "@/auth/hooks";
+import { Box, Typography } from "@mui/material";
+import { TweetItem } from "@/shared/components";
 
 export default function RenderTweets() {
   const loaderRef = useRef<HTMLDivElement>(null);
@@ -51,7 +52,17 @@ export default function RenderTweets() {
   }, [hasNextPage, isFetching, isFetchingNextPage, fetchNextPage]);
 
   if (isLoading) {
-    return <p>Loading initial tweets...</p>;
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignContent: "center",
+        }}
+      >
+        <Typography>Loading more tweets...</Typography>
+      </Box>
+    );
   }
 
   if (status === "error") {
@@ -74,8 +85,17 @@ export default function RenderTweets() {
 
       <div ref={loaderRef} style={{ height: 40 }} />
 
-      {isFetchingNextPage && <p>Loading more tweets...</p>}
-      {!hasNextPage && allTweets.length > 0 && <p>No more tweets to load.</p>}
+      {isFetchingNextPage && (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignContent: "center",
+          }}
+        >
+          <Typography>Loading more tweets...</Typography>
+        </Box>
+      )}
     </>
   );
 }
